@@ -60,10 +60,10 @@ template<typename T, size_t offset> struct linked_list
 	{
 		list_node *node = get_node(obj);
 		list_node *n = get_node(pos);
-		node->prev = n->prev;
-		node->next = n;
 		n->prev->next = node;
+		node->prev = n->prev;
 		n->prev = node;
+		node->next = n;
 	}
 
 	//////////////////////////////////////////////////////////////////////
@@ -72,10 +72,10 @@ template<typename T, size_t offset> struct linked_list
 	{
 		list_node *node = get_node(&obj);
 		list_node *n = get_node(&pos);
-		node->prev = n->prev;
 		n->prev->next = node;
-		node->next = n;
+		node->prev = n->prev;
 		n->prev = node;
+		node->next = n;
 	}
 
 	//////////////////////////////////////////////////////////////////////
@@ -84,8 +84,8 @@ template<typename T, size_t offset> struct linked_list
 	{
 		list_node *node = get_node(obj);
 		list_node *n = get_node(pos);
-		node->next = n->next;
 		n->next->prev = node;
+		node->next = n->next;
 		n->next = node;
 		node->prev = n;
 	}
