@@ -166,20 +166,22 @@ template<typename T, size_t offset> struct linked_list
 
 	//////////////////////////////////////////////////////////////////////
 
-	void pop_back() throw()
+	T *pop_back() throw()
 	{
 		list_node *node = root.prev;
 		node->prev->next = node->next;
 		node->next->prev = node->prev;
+		return get_object(node);
 	}
 
 	//////////////////////////////////////////////////////////////////////
 
-	void pop_front() throw()
+	T *pop_front() throw()
 	{
 		list_node *node = root.next;
 		node->next->prev = node->prev;
 		node->prev->next = node->next;
+		return get_object(node);
 	}
 
 	//////////////////////////////////////////////////////////////////////
