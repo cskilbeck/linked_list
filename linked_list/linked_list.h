@@ -4,6 +4,11 @@
 
 //////////////////////////////////////////////////////////////////////
 
+#include <cstddef>
+#include <functional>
+
+//////////////////////////////////////////////////////////////////////
+
 struct list_node
 {
 	list_node *next;
@@ -56,6 +61,50 @@ template<typename T, size_t offset> struct linked_list
 
 	//////////////////////////////////////////////////////////////////////
 
+	void push_front(T *obj) throw()
+	{
+		list_node *node = get_node(obj);
+		root.next->prev = node;
+		node->next = root.next;
+		node->prev = &root;
+		root.next = node;
+	}
+
+	//////////////////////////////////////////////////////////////////////
+
+	void push_front(T &obj) throw()
+	{
+		list_node *node = get_node(&obj);
+		root.next->prev = node;
+		node->next = root.next;
+		node->prev = &root;
+		root.next = node;
+	}
+
+	//////////////////////////////////////////////////////////////////////
+
+	void push_back(T *obj) throw()
+	{
+		list_node *node = get_node(obj);
+		node->prev = root.prev;
+		node->next = &root;
+		root.prev->next = node;
+		root.prev = node;
+	}
+
+	//////////////////////////////////////////////////////////////////////
+
+	void push_back(T &obj) throw()
+	{
+		list_node *node = get_node(&obj);
+		node->prev = root.prev;
+		node->next = &root;
+		root.prev->next = node;
+		root.prev = node;
+	}
+
+	//////////////////////////////////////////////////////////////////////
+
 	void insert_before(T *pos, T *obj) throw()
 	{
 		list_node *node = get_node(obj);
@@ -100,50 +149,6 @@ template<typename T, size_t offset> struct linked_list
 		node->next = n->next;
 		n->next = node;
 		node->prev = n;
-	}
-
-	//////////////////////////////////////////////////////////////////////
-
-	void push_back(T *obj) throw()
-	{
-		list_node *node = get_node(obj);
-		node->prev = root.prev;
-		node->next = &root;
-		root.prev->next = node;
-		root.prev = node;
-	}
-
-	//////////////////////////////////////////////////////////////////////
-
-	void push_back(T &obj) throw()
-	{
-		list_node *node = get_node(&obj);
-		node->prev = root.prev;
-		node->next = &root;
-		root.prev->next = node;
-		root.prev = node;
-	}
-
-	//////////////////////////////////////////////////////////////////////
-
-	void push_front(T *obj) throw()
-	{
-		list_node *node = get_node(obj);
-		root.next->prev = node;
-		node->next = root.next;
-		node->prev = &root;
-		root.next = node;
-	}
-
-	//////////////////////////////////////////////////////////////////////
-
-	void push_front(T &obj) throw()
-	{
-		list_node *node = get_node(&obj);
-		root.next->prev = node;
-		node->next = root.next;
-		node->prev = &root;
-		root.next = node;
 	}
 
 	//////////////////////////////////////////////////////////////////////
@@ -232,7 +237,40 @@ template<typename T, size_t offset> struct linked_list
 	{
 		return get_object(get_node(i)->prev);
 	}
+
+	//////////////////////////////////////////////////////////////////////
+
+	bool for_each(std::function<bool (T *)> func)
+	{
+		for(T *i = head(); i != end(); i = next(i))
+		{
+			if(!func(i))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	//////////////////////////////////////////////////////////////////////
+
+	T *find(std::function<bool (T *)> func)
+	{
+		for(T *i = head(); i != end(); i = next(i))
+		{
+			if(func(i))
+			{
+				return i;
+			}
+		}
+		return nullptr;
+	}
+
+	//////////////////////////////////////////////////////////////////////
+
 };
+
+//////////////////////////////////////////////////////////////////////
 
 #define declare_linked_list(type_name, node_name) linked_list<type_name, offsetof(type_name, node_name)>
 #define typedef_linked_list(type_name, node_name) typedef declare_linked_list(type_name, node_name)

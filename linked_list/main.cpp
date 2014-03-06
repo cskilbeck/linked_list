@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <cstddef>
 #include <random>
 #include "linked_list.h"
 
@@ -43,23 +42,30 @@ int main(int, char **)
 	bob b(rand());
 	bob c(rand());
 
+	bob aa(100);
+
 	bill d(a.i);
 	bill e(b.i);
 	bill f(c.i);
 
-	printf("Added: %d\n", a.get_i());
-	printf("Added: %d\n", b.get_i());
-	printf("Added: %d\n", c.get_i());
+	bill dd(100);
 
-	printf("%d\n", a.i + b.i + c.i);
+	printf("a: %d\n", a.get_i());
+	printf("b: %d\n", b.get_i());
+	printf("c: %d\n", c.get_i());
+	printf("aa: %d\n", aa.get_i());
 
 	l.push_back(&a);
 	l.push_back(&b);
 	l.push_back(&c);
 
+	l.insert_before(&a, &aa);
+
 	l2.push_back(d);
 	l2.push_back(e);
 	l2.push_back(f);
+
+	l2.insert_before(&d, &dd);
 
 	int total = 0;
 	int total2 = 0;
@@ -80,6 +86,20 @@ int main(int, char **)
 	}
 
 	printf("total: %d\n", total2);
+
+	printf("for_each:\n");
+	l2.for_each([] (bill *b) { printf("%d\n", b->i); return true; });
+
+	bob *s = l.find([] (bob *b) { return b->i == 100; });
+
+	if(s != nullptr)
+	{
+		printf("Found: %d\n", s->i);
+	}
+	else
+	{
+		printf("Not found\n");
+	}
 
 	getchar();
 	return 0;
