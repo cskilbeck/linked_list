@@ -18,7 +18,15 @@ struct bob
 	}
 };
 
-struct bill : bob
+struct jack
+{
+	virtual int get_j()
+	{
+		return 1;
+	}
+};
+
+struct bill : bob, jack
 {
 	bill(int _i): bob(_i)
 	{

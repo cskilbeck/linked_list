@@ -219,7 +219,7 @@ template<typename T, size_t offset> struct linked_list
 
 	//////////////////////////////////////////////////////////////////////
 
-	T const *end() throw()
+	T const *end() const throw()
 	{
 		return get_object(&root);
 	}
