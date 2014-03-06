@@ -233,4 +233,4 @@ template<typename T, size_t offset> struct linked_list
 };
 
 #define declare_linked_list(type_name, node_name) linked_list<type_name, offsetof(type_name, node_name)>
-#define linked_list_typedef(type_name, node_name) typedef declare_linked_list(type_name, node_name)
+#define typedef_linked_list(type_name, node_name) typedef declare_linked_list(type_name, node_name)
