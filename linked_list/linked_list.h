@@ -15,41 +15,41 @@ struct list_node
 	list_node *prev;
 };
 
+//////////////////////////////////////////////////////////////////////
+
+template<typename T, list_node T::* node> struct linked_list
+{
 	//////////////////////////////////////////////////////////////////////
 
-	template<typename T, list_node T::* node> struct linked_list
+	static list_node const &get_node(T const *o)
 	{
-		//////////////////////////////////////////////////////////////////////
+		return *reinterpret_cast<list_node const *>
+			(reinterpret_cast<char const *>(o) + offsetof(T, *node));
+	}
 
-		static list_node const &get_node(T const *o)
-		{
-			return *reinterpret_cast<list_node const *>
-				(reinterpret_cast<char const *>(o) + offsetof(T, *node));
-		}
+	//////////////////////////////////////////////////////////////////////
 
-		//////////////////////////////////////////////////////////////////////
+	static list_node &get_node(T *o)
+	{
+		return *reinterpret_cast<list_node *>
+			(reinterpret_cast<char *>(o) + offsetof(T, *node));
+	}
 
-		static list_node &get_node(T *o)
-		{
-			return *reinterpret_cast<list_node *>
-				(reinterpret_cast<char *>(o) + offsetof(T, *node));
-		}
+	//////////////////////////////////////////////////////////////////////
 
-		//////////////////////////////////////////////////////////////////////
+	static T const *get_object(list_node const *n)
+	{
+		return reinterpret_cast<T const *>
+			(reinterpret_cast<char const *>(n) - offsetof(T, *node));
+	}
 
-		static T const *get_object(list_node const *n)
-		{
-			return reinterpret_cast<T const *>
-				(reinterpret_cast<char const *>(n) - offsetof(T, *node));
-		}
+	//////////////////////////////////////////////////////////////////////
 
-		//////////////////////////////////////////////////////////////////////
-
-		static T *get_object(list_node *n)
-		{
-			return reinterpret_cast<T *>
-				(reinterpret_cast<char *>(n) - offsetof(T, *node));
-		}
+	static T *get_object(list_node *n)
+	{
+		return reinterpret_cast<T *>
+			(reinterpret_cast<char *>(n) - offsetof(T, *node));
+	}
 
 	//////////////////////////////////////////////////////////////////////
 
@@ -194,7 +194,7 @@ struct list_node
 
 	//////////////////////////////////////////////////////////////////////
 
-	bool empty() const
+	bool is_empty() const
 	{
 		return root.next == &root;
 	}
@@ -243,13 +243,13 @@ struct list_node
 
 	//////////////////////////////////////////////////////////////////////
 
-	void move_into(linked_list<T, node> &new_list, std::function<bool (T *)> func)
+	template <typename F> void move_into(linked_list<T, node> &new_list, F &function)
 	{
 		T *i = head();
 		while(i != end())
 		{
 			T *n = next(i);
-			if(func(i))
+			if(function(i))
 			{
 				remove(i);
 				new_list.push_back(i);
@@ -260,13 +260,13 @@ struct list_node
 
 	//////////////////////////////////////////////////////////////////////
 
-	void remove_if(std::function<bool (T *)> func)
+	template <typename F> void remove_if(F &function)
 	{
 		T *i = head();
 		while(i != end())
 		{
 			T *n = next(i);
-			if(func(i))
+			if(function(i))
 			{
 				remove(i);
 			}
@@ -276,22 +276,22 @@ struct list_node
 
 	//////////////////////////////////////////////////////////////////////
 
-	bool for_each(std::function<void (T *)> func)
+	template<typename F> bool for_each(F &function)
 	{
 		for(T *i = head(); i != end(); i = next(i))
 		{
-			func(i);
+			function(i);
 		}
 		return true;
 	}
 
 	//////////////////////////////////////////////////////////////////////
 
-	bool reverse_for_each(std::function<bool (T *)> func)
+	template<typename F> bool reverse_for_each(F &function)
 	{
 		for(T *i = tail(); i != end(); i = prev(i))
 		{
-			if(!func(i))
+			if(!function(i))
 			{
 				return false;
 			}
@@ -301,11 +301,11 @@ struct list_node
 
 	//////////////////////////////////////////////////////////////////////
 
-	T *find(std::function<bool (T *)> func)
+	template <typename F> T *find(F &function)
 	{
 		for(T *i = head(); i != end(); i = next(i))
 		{
-			if(func(i))
+			if(function(i))
 			{
 				return i;
 			}
@@ -315,11 +315,11 @@ struct list_node
 
 	//////////////////////////////////////////////////////////////////////
 
-	T *reverse_find(std::function<bool (T *)> func)
+	template <typename F> T *reverse_find(F &function)
 	{
 		for(T *i = tail(); i != end(); i = prev(i))
 		{
-			if(func(i))
+			if(function(i))
 			{
 				return i;
 			}
