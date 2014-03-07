@@ -2,112 +2,62 @@
 #include <random>
 #include "linked_list.h"
 
-struct bob
+struct foo
 {
-	list_node node;
-	list_node node2;
+	foo(int n = 0) : i(n) { }
+
+	list_node node1;	// would like it if these could be made private
+	list_node node2;	// but the nasty macros need to see inside...
+	list_node node3;	// getting rid of the macros would be even better
+
 	int i;
-
-	bob(int _i) : i(_i)
-	{
-	}
-
-	virtual int get_i()
-	{
-		return i;
-	}
 };
 
-struct jack
+linked_list<foo, &foo::node1> list1;
+linked_list<foo, &foo::node2> list2;
+linked_list<foo, &foo::node3> list3;
+
+template <typename T> void print_list(T &list, char const *message)
 {
-	virtual int get_j()
+	printf("%s\n", message);
+	list.for_each([] (foo *p)
 	{
-		return 1;
-	}
-};
-
-struct bill : bob, jack
-{
-	bill(int _i): bob(_i)
-	{
-	}
-
-	virtual int get_i()
-	{
-		return 0;
-	}
-};
-
-typedef_linked_list(bob, node) bob_list;
-typedef_linked_list(bill, node2) bob_list2;
-
-bob_list l;
-bob_list2 l2;
+		printf(" %d\n", p->i);
+	});
+	puts("");
+}
 
 int main(int, char **)
 {
-	bob a(rand());
-	bob b(rand());
-	bob c(rand());
+	foo foos[10];
 
-	bob aa(100);
-
-	bill d(a.i);
-	bill e(b.i);
-	bill f(c.i);
-
-	bill dd(100);
-
-	printf("a: %d\n", a.get_i());
-	printf("b: %d\n", b.get_i());
-	printf("c: %d\n", c.get_i());
-	printf("aa: %d\n", aa.get_i());
-
-	l.push_back(&a);
-	l.push_back(&b);
-	l.push_back(&c);
-
-	l.insert_before(&a, &aa);
-
-	l2.push_back(d);
-	l2.push_back(e);
-	l2.push_back(f);
-
-	l2.insert_before(&d, &dd);
-
-	int total = 0;
-	int total2 = 0;
-
-	printf("l:\n");
-	for(bob *i = l.head(); i != l.end(); i = l.next(i))
+	for(int i=0; i<10; ++i)
 	{
-		printf("  %d\n", i->get_i());
-		total += i->get_i();
-	}
-	printf("total: %d\n", total);
-
-	printf("l2:\n");
-	for(bill *i = l2.head(); i != l2.end(); i = l2.next(i))
-	{
-		printf("  %d\n", i->i);
-		total2 += i->i;
+		foos[i].i = i;
+		list1.push_back(&foos[i]);
+		list2.push_back(&foos[i]);
 	}
 
-	printf("total: %d\n", total2);
+	print_list(list1, "list1");
 
-	printf("for_each:\n");
-	l2.for_each([] (bill *b) { printf("%d\n", b->i); return true; });
+	list2.remove(foos[2]);
 
-	bob *s = l.find([] (bob *b) { return b->i == 100; });
+	print_list(list2, "list2");
 
-	if(s != nullptr)
-	{
-		printf("Found: %d\n", s->i);
-	}
-	else
-	{
-		printf("Not found\n");
-	}
+	list2.remove_if([] (foo *p) { return p->i > 7; });
+
+	print_list(list2, "list2");
+
+	list3.push_back(foos[0]);
+	list3.push_back(foos[1]);
+
+	print_list(list3, "list3");
+
+	linked_list<foo, &foo::node3> list3_a;
+	list3.move_into(list3_a, [] (foo *p) { return (p->i % 2) == 0; });
+
+	print_list(list3, "list3");
+	print_list(list3_a, "list3_a");
 
 	getchar();
 	return 0;
