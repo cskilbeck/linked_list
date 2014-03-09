@@ -6,9 +6,9 @@ struct foo
 {
 	foo(int n = 0) : i(n) { }
 
-	list_node node1;	// would like it if these could be made private
-	list_node node2;	// but the nasty macros need to see inside...
-	list_node node3;	// getting rid of the macros would be even better
+	list_node node1;
+	list_node node2;
+	list_node node3;
 
 	int i;
 };
