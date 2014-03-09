@@ -12,7 +12,7 @@ struct list_node
 
 //////////////////////////////////////////////////////////////////////
 
-template<typename T, list_node T::* node> struct linked_list
+template<typename T, list_node T::* node = nullptr> struct linked_list
 {
 public:
 
@@ -322,4 +322,8 @@ private:
 	list_node root;
 
 	//////////////////////////////////////////////////////////////////////
+};
+
+template <typename T> struct linked_list<T, (list_node T::*) nullptr>
+{
 };
