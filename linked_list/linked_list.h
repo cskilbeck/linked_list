@@ -12,7 +12,25 @@ struct list_node
 
 //////////////////////////////////////////////////////////////////////
 
-template<typename T, list_node T::* node = nullptr> struct linked_list
+template <typename T, list_node T::*NODE, bool is_member> struct list_base
+{
+};
+
+template <typename T, list_node T::*NODE>
+struct list_base<T, NODE, true>
+{
+};
+
+template <typename T, list_node T::*NODE>
+struct list_base<T, NODE, false>
+{
+};
+
+template <typename T, list_node T::*NODE = nullptr> struct mylist : list_base<T, NODE, NODE == nullptr>
+{
+};
+
+template<typename T, list_node T::* NODE, bool is_member = true> struct linked_list
 {
 public:
 
@@ -202,22 +220,6 @@ public:
 
 	//////////////////////////////////////////////////////////////////////
 
-	template <typename F> void move_into(linked_list<T, node> &new_list, F &function)
-	{
-		for(T *i = head(); i != end(); i = next(i))
-		{
-			T *n = next(i);
-			if(function(i))
-			{
-				remove(i);
-				new_list.push_back(i);
-			}
-			i = n;
-		}
-	}
-
-	//////////////////////////////////////////////////////////////////////
-
 	template <typename F> void remove_if(F &function)
 	{
 		for(T *i = head(); i != end(); i = next(i))
@@ -290,7 +292,7 @@ private:
 	static list_node const &get_node(T const *o)
 	{
 		return *reinterpret_cast<list_node const *>
-			(reinterpret_cast<char const *>(o)+offsetof(T, *node));
+			(reinterpret_cast<char const *>(o)+offsetof(T, *NODE));
 	}
 
 	//////////////////////////////////////////////////////////////////////
@@ -298,7 +300,7 @@ private:
 	static list_node &get_node(T *o)
 	{
 		return *reinterpret_cast<list_node *>
-			(reinterpret_cast<char *>(o)+offsetof(T, *node));
+			(reinterpret_cast<char *>(o)+offsetof(T, *NODE));
 	}
 
 	//////////////////////////////////////////////////////////////////////
@@ -306,7 +308,7 @@ private:
 	static T const *get_object(list_node const *n)
 	{
 		return reinterpret_cast<T const *>
-			(reinterpret_cast<char const *>(n)-offsetof(T, *node));
+			(reinterpret_cast<char const *>(n)-offsetof(T, *NODE));
 	}
 
 	//////////////////////////////////////////////////////////////////////
@@ -314,7 +316,7 @@ private:
 	static T *get_object(list_node *n)
 	{
 		return reinterpret_cast<T *>
-			(reinterpret_cast<char *>(n)-offsetof(T, *node));
+			(reinterpret_cast<char *>(n)-offsetof(T, *NODE));
 	}
 
 	//////////////////////////////////////////////////////////////////////
@@ -324,6 +326,3 @@ private:
 	//////////////////////////////////////////////////////////////////////
 };
 
-template <typename T> struct linked_list<T, (list_node T::*) nullptr>
-{
-};

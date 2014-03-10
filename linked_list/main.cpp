@@ -2,6 +2,15 @@
 #include <random>
 #include "linked_list.h"
 
+#include <map>
+
+template<typename KEY, typename VALUE>
+bool find(const std::map<KEY, VALUE>& container, const KEY& key)
+{
+	typename std::map<KEY, VALUE>::const_iterator iterator = container.find(key);
+	return iter != container.end();
+}
+
 struct foo
 {
 	foo(int n = 0) : i(n) { }
@@ -50,14 +59,6 @@ int main(int, char **)
 
 	list3.push_back(foos[0]);
 	list3.push_back(foos[1]);
-
-	print_list(list3, "list3");
-
-	linked_list<foo, &foo::node3> list3_a;
-	list3.move_into(list3_a, [] (foo *p) { return (p->i % 2) == 0; });
-
-	print_list(list3, "list3");
-	print_list(list3_a, "list3_a");
 
 	getchar();
 	return 0;
