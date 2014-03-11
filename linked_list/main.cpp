@@ -16,16 +16,19 @@ struct foo: list_node<foo>
 		lister.remove(this);
 	}
 	int p;
-	list_node<foo> node;
+
+	list_node<foo> node1;
 	list_node<foo> node2;
 
-	linked_list<foo> lister;
+	static linked_list<foo> lister;
 };
 
 //////////////////////////////////////////////////////////////////////
 
-linked_list<foo> list1;
-linked_list<foo, &foo::node> list2;
+linked_list<foo> foo::lister;
+
+linked_list<foo, &foo::node1> list1;
+linked_list<foo, &foo::node2> list2;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -100,6 +103,8 @@ int main(int, char **)
 
 	print_list("1", list1);
 	print_list("2", list2);
+
+	print_list("!", foo::lister);
 
 	getchar();
 	return 0;

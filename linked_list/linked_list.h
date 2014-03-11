@@ -65,11 +65,10 @@ protected:
 
 template <typename T, list_node<T> T::*NODE = nullptr> struct linked_list: list_base<T, NODE, NODE>
 {
-	typedef T obj_type;
-	typedef T *pointer;
-	typedef T const *const_pointer;
-	typedef T &ref;
-	typedef T const &const_ref;
+	typedef T *			pointer;
+	typedef T const *	const_pointer;
+	typedef T &			ref;
+	typedef T const &	const_ref;
 
 	void clear()
 	{
@@ -108,35 +107,35 @@ template <typename T, list_node<T> T::*NODE = nullptr> struct linked_list: list_
 		return obj;
 	}
 
-	linked_list() { clear(); }
+					linked_list()							{ clear(); }
 
-	bool is_empty() const						{ const_ref root = root_object(); return get_node(root).next == &root; }
+	bool			is_empty() const						{ return root_node.node_pointers.next == &root_object(); }
 
-	pointer head()								{ return get_node(root_object()).next; }
-	const_pointer head() const					{ return get_node(root_object()).next; }
+	pointer			head()									{ return root_node.node_pointers.next; }
+	const_pointer	head() const							{ return root_node.node_pointers.next; }
 
-	pointer tail()								{ return get_node(root_object()).prev; }
-	const_pointer tail() const					{ return get_node(root_object()).prev; }
+	pointer			tail()									{ return root_node.node_pointers.prev; }
+	const_pointer	tail() const							{ return root_node.node_pointers.prev; }
 
-	pointer next(pointer obj)					{ return get_node(obj).next; }
-	const_pointer next(const_pointer obj) const	{ return get_node(obj).next; }
+	pointer			next(pointer obj)						{ return get_node(obj).next; }
+	const_pointer	next(const_pointer obj) const			{ return get_node(obj).next; }
 
-	pointer prev(pointer obj)					{ return get_node(obj).prev; }
-	const_pointer prev(const_pointer obj) const	{ return get_node(obj).prev; }
+	pointer			prev(pointer obj)						{ return get_node(obj).prev; }
+	const_pointer	prev(const_pointer obj) const			{ return get_node(obj).prev; }
 
-	const_pointer end() const					{ return &root_object(); }
+	const_pointer	end() const								{ return &root_object(); }
 
-	void insert_before(ref obj_before, ref obj)	{ insert_before(&obj_before, &obj); }
-	void insert_after(ref obj_after, ref obj)	{ insert_after(&obj_after, &obj); }
+	void			insert_before(ref obj_before, ref obj)	{ insert_before(&obj_before, &obj); }
+	void			insert_after(ref obj_after, ref obj)	{ insert_after(&obj_after, &obj); }
 
-	pointer remove(ref obj)						{ return remove(&obj); }
+	pointer			remove(ref obj)							{ return remove(&obj); }
 
-	void push_back(ref obj)						{ insert_before(root_object(), obj); }
-	void push_back(pointer obj)					{ insert_before(root_object(), *obj); }
+	void			push_back(ref obj)						{ insert_before(root_object(), obj); }
+	void			push_back(pointer obj)					{ insert_before(root_object(), *obj); }
 
-	void push_front(ref obj)					{ insert_after(root_object(), obj); }
-	void push_front(pointer obj)				{ insert_after(root_object(), *obj); }
-
-	pointer pop_front()							{ return !is_empty() ? remove(head()) : nullptr; }
-	pointer pop_back()							{ return !is_empty() ? remove(tail()) : nullptr; }
+	void			push_front(ref obj)						{ insert_after(root_object(), obj); }
+	void			push_front(pointer obj)					{ insert_after(root_object(), *obj); }
+		
+	pointer			pop_front()								{ return !is_empty() ? remove(head()) : nullptr; }
+	pointer			pop_back()								{ return !is_empty() ? remove(tail()) : nullptr; }
 };
