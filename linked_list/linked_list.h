@@ -33,8 +33,8 @@ protected:
 
 	linked_list_node<T> root_node;
 
-	T &			root_object()		{ return *reinterpret_cast<T *>			(reinterpret_cast<char *>		(&root_node) - offsetof(T, *NODE)); }
-	T const &	root_object() const	{ return *reinterpret_cast<T const *>	(reinterpret_cast<char const *>	(&root_node) - offsetof(T, *NODE)); }
+	T *			root_object()		{ return reinterpret_cast<T *>			(reinterpret_cast<char *>		(&root_node) - offsetof(T, *NODE)); }
+	T const *	root_object() const	{ return reinterpret_cast<T const *>	(reinterpret_cast<char const *>	(&root_node) - offsetof(T, *NODE)); }
 
 	list_node_base<T> &get_node(T *obj) { return (obj->*NODE).list_node; }
 	list_node_base<T> &get_node(T &obj) { return (obj.*NODE).list_node; }
@@ -51,8 +51,8 @@ protected:
 
 	linked_list_node<T> root_node;
 
-	T &			root_object()		{ return *reinterpret_cast<T *>			(reinterpret_cast<char *>		(&root_node) - offsetof(T, list_node)); }
-	T const &	root_object() const	{ return *reinterpret_cast<T const *>	(reinterpret_cast<char const *>	(&root_node) - offsetof(T, list_node)); }
+	T *			root_object()		{ return reinterpret_cast<T *>			(reinterpret_cast<char *>		(&root_node) - offsetof(T, list_node)); }
+	T const *	root_object() const	{ return reinterpret_cast<T const *>	(reinterpret_cast<char const *>	(&root_node) - offsetof(T, list_node)); }
 
 	list_node_base<T> &get_node(T *obj) const { return obj->list_node; }
 	list_node_base<T> &get_node(T &obj) const { return obj.list_node; }
@@ -72,10 +72,9 @@ template <typename T, linked_list_node<T> T::*NODE = nullptr> struct linked_list
 
 	void clear()
 	{
-		ref root = root_object();
-		list_node_base<T> &node = get_node(root);
-		node.next = &root;
-		node.prev = &root;
+		pointer root = root_object();
+		root_node.list_node.next = root;
+		root_node.list_node.prev = root;
 	}
 
 	void insert_before(pointer obj_before, pointer obj)
@@ -109,7 +108,7 @@ template <typename T, linked_list_node<T> T::*NODE = nullptr> struct linked_list
 
 					linked_list()							{ clear(); }
 
-	bool			is_empty() const						{ return root_node.list_node.next == &root_object(); }
+	bool			is_empty() const						{ return root_node.list_node.next == root_object(); }
 
 	pointer			head()									{ return root_node.list_node.next; }
 	const_pointer	head() const							{ return root_node.list_node.next; }
@@ -123,17 +122,17 @@ template <typename T, linked_list_node<T> T::*NODE = nullptr> struct linked_list
 	pointer			prev(pointer obj)						{ return get_node(obj).prev; }
 	const_pointer	prev(const_pointer obj) const			{ return get_node(obj).prev; }
 
-	const_pointer	end() const								{ return &root_object(); }
+	const_pointer	end() const								{ return root_object(); }
 
 	void			insert_before(ref obj_before, ref obj)	{ insert_before(&obj_before, &obj); }
 	void			insert_after(ref obj_after, ref obj)	{ insert_after(&obj_after, &obj); }
 
 	pointer			remove(ref obj)							{ return remove(&obj); }
 
-	void			push_back(ref obj)						{ insert_before(root_object(), obj); }
-	void			push_back(pointer obj)					{ insert_before(root_object(), *obj); }
+	void			push_back(ref obj)						{ insert_before(*root_object(), obj); }
+	void			push_back(pointer obj)					{ insert_before(root_object(), obj); }
 
-	void			push_front(ref obj)						{ insert_after(root_object(), obj); }
+	void			push_front(ref obj)						{ insert_after(*root_object(), obj); }
 	void			push_front(pointer obj)					{ insert_after(root_object(), *obj); }
 		
 	pointer			pop_front()								{ return !is_empty() ? remove(head()) : nullptr; }
