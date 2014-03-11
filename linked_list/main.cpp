@@ -104,6 +104,9 @@ int main(int, char **)
 	print_list("1", list1);
 	print_list("2", list2);
 
+	list1.pop_back();
+	list2.pop_front();
+
 	print_list("!", foo::lister);
 
 	getchar();
