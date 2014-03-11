@@ -5,7 +5,7 @@
 
 //////////////////////////////////////////////////////////////////////
 
-struct foo: list_node<foo>
+struct foo: linked_list_node<foo>
 {
 	foo(int n) : p(n)
 	{
@@ -17,8 +17,8 @@ struct foo: list_node<foo>
 	}
 	int p;
 
-	list_node<foo> node1;
-	list_node<foo> node2;
+	linked_list_node<foo> node1;
+	linked_list_node<foo> node2;
 
 	static linked_list<foo> lister;
 };

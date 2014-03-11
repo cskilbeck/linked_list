@@ -14,56 +14,56 @@ template <typename T> struct list_node_base
 
 //////////////////////////////////////////////////////////////////////
 
-template <typename T> struct list_node
+template <typename T> struct linked_list_node
 {
-	list_node_base<T> node_pointers;
+	list_node_base<T> list_node;
 };
 
 //////////////////////////////////////////////////////////////////////
 
-template <typename T, list_node<T> T::*NODE, bool is_member> struct list_base
+template <typename T, linked_list_node<T> T::*NODE, bool is_member> struct list_base
 {
 };
 
 //////////////////////////////////////////////////////////////////////
 
-template <typename T, list_node<T> T::*NODE> struct list_base<T, NODE, true>
+template <typename T, linked_list_node<T> T::*NODE> struct list_base<T, NODE, true>
 {
 protected:
 
-	list_node<T> root_node;
+	linked_list_node<T> root_node;
 
 	T &			root_object()		{ return *reinterpret_cast<T *>			(reinterpret_cast<char *>		(&root_node) - offsetof(T, *NODE)); }
 	T const &	root_object() const	{ return *reinterpret_cast<T const *>	(reinterpret_cast<char const *>	(&root_node) - offsetof(T, *NODE)); }
 
-	list_node_base<T> &get_node(T *obj) { return (obj->*NODE).node_pointers; }
-	list_node_base<T> &get_node(T &obj) { return (obj.*NODE).node_pointers; }
+	list_node_base<T> &get_node(T *obj) { return (obj->*NODE).list_node; }
+	list_node_base<T> &get_node(T &obj) { return (obj.*NODE).list_node; }
 
-	list_node_base<T> const &get_node(T const *obj) const { return (obj->*NODE).node_pointers; }
-	list_node_base<T> const &get_node(T const &obj) const { return (obj.*NODE).node_pointers; }
+	list_node_base<T> const &get_node(T const *obj) const { return (obj->*NODE).list_node; }
+	list_node_base<T> const &get_node(T const &obj) const { return (obj.*NODE).list_node; }
 };
 
 //////////////////////////////////////////////////////////////////////
 
-template <typename T, list_node<T> T::*NODE> struct list_base<T, NODE, false>
+template <typename T, linked_list_node<T> T::*NODE> struct list_base<T, NODE, false>
 {
 protected:
 
-	list_node<T> root_node;
+	linked_list_node<T> root_node;
 
-	T &			root_object()		{ return *reinterpret_cast<T *>			(reinterpret_cast<char *>		(&root_node) - offsetof(T, node_pointers)); }
-	T const &	root_object() const	{ return *reinterpret_cast<T const *>	(reinterpret_cast<char const *>	(&root_node) - offsetof(T, node_pointers)); }
+	T &			root_object()		{ return *reinterpret_cast<T *>			(reinterpret_cast<char *>		(&root_node) - offsetof(T, list_node)); }
+	T const &	root_object() const	{ return *reinterpret_cast<T const *>	(reinterpret_cast<char const *>	(&root_node) - offsetof(T, list_node)); }
 
-	list_node_base<T> &get_node(T *obj) const { return obj->node_pointers; }
-	list_node_base<T> &get_node(T &obj) const { return obj.node_pointers; }
+	list_node_base<T> &get_node(T *obj) const { return obj->list_node; }
+	list_node_base<T> &get_node(T &obj) const { return obj.list_node; }
 
-	list_node_base<T> const &get_node(T const *obj) const { return obj->node_pointers; }
-	list_node_base<T> const &get_node(T const &obj) const { return obj.node_pointers; }
+	list_node_base<T> const &get_node(T const *obj) const { return obj->list_node; }
+	list_node_base<T> const &get_node(T const &obj) const { return obj.list_node; }
 };
 
 //////////////////////////////////////////////////////////////////////
 
-template <typename T, list_node<T> T::*NODE = nullptr> struct linked_list: list_base<T, NODE, NODE>
+template <typename T, linked_list_node<T> T::*NODE = nullptr> struct linked_list: list_base<T, NODE, NODE>
 {
 	typedef T *			pointer;
 	typedef T const *	const_pointer;
@@ -109,13 +109,13 @@ template <typename T, list_node<T> T::*NODE = nullptr> struct linked_list: list_
 
 					linked_list()							{ clear(); }
 
-	bool			is_empty() const						{ return root_node.node_pointers.next == &root_object(); }
+	bool			is_empty() const						{ return root_node.list_node.next == &root_object(); }
 
-	pointer			head()									{ return root_node.node_pointers.next; }
-	const_pointer	head() const							{ return root_node.node_pointers.next; }
+	pointer			head()									{ return root_node.list_node.next; }
+	const_pointer	head() const							{ return root_node.list_node.next; }
 
-	pointer			tail()									{ return root_node.node_pointers.prev; }
-	const_pointer	tail() const							{ return root_node.node_pointers.prev; }
+	pointer			tail()									{ return root_node.list_node.prev; }
+	const_pointer	tail() const							{ return root_node.list_node.prev; }
 
 	pointer			next(pointer obj)						{ return get_node(obj).next; }
 	const_pointer	next(const_pointer obj) const			{ return get_node(obj).next; }
