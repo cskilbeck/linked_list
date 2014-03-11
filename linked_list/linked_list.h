@@ -2,327 +2,141 @@
 
 #pragma once
 
-//////////////////////////////////////////////////////////////////////
-
-struct list_node
-{
-	list_node *next;
-	list_node *prev;
-};
+#include <cstddef>
 
 //////////////////////////////////////////////////////////////////////
 
-template <typename T, list_node T::*NODE, bool is_member> struct list_base
+template <typename T> struct list_node_base
+{
+	T *next;
+	T *prev;
+};
+
+//////////////////////////////////////////////////////////////////////
+
+template <typename T> struct list_node
+{
+	list_node_base<T> node_pointers;
+};
+
+//////////////////////////////////////////////////////////////////////
+
+template <typename T, list_node<T> T::*NODE, bool is_member> struct list_base
 {
 };
 
-template <typename T, list_node T::*NODE>
-struct list_base<T, NODE, true>
+//////////////////////////////////////////////////////////////////////
+
+template <typename T, list_node<T> T::*NODE> struct list_base<T, NODE, true>
 {
+protected:
+
+	list_node<T> root_node;
+
+	T &			root_object()		{ return *reinterpret_cast<T *>			(reinterpret_cast<char *>		(&root_node) - offsetof(T, *NODE)); }
+	T const &	root_object() const	{ return *reinterpret_cast<T const *>	(reinterpret_cast<char const *>	(&root_node) - offsetof(T, *NODE)); }
+
+	list_node_base<T> &get_node(T *obj) { return (obj->*NODE).node_pointers; }
+	list_node_base<T> &get_node(T &obj) { return (obj.*NODE).node_pointers; }
+
+	list_node_base<T> const &get_node(T const *obj) const { return (obj->*NODE).node_pointers; }
+	list_node_base<T> const &get_node(T const &obj) const { return (obj.*NODE).node_pointers; }
 };
 
-template <typename T, list_node T::*NODE>
-struct list_base<T, NODE, false>
+//////////////////////////////////////////////////////////////////////
+
+template <typename T, list_node<T> T::*NODE> struct list_base<T, NODE, false>
 {
+protected:
+
+	list_node<T> root_node;
+
+	T &			root_object()		{ return *reinterpret_cast<T *>			(reinterpret_cast<char *>		(&root_node) - offsetof(T, node_pointers)); }
+	T const &	root_object() const	{ return *reinterpret_cast<T const *>	(reinterpret_cast<char const *>	(&root_node) - offsetof(T, node_pointers)); }
+
+	list_node_base<T> &get_node(T *obj) const { return obj->node_pointers; }
+	list_node_base<T> &get_node(T &obj) const { return obj.node_pointers; }
+
+	list_node_base<T> const &get_node(T const *obj) const { return obj->node_pointers; }
+	list_node_base<T> const &get_node(T const &obj) const { return obj.node_pointers; }
 };
 
-template <typename T, list_node T::*NODE = nullptr> struct mylist : list_base<T, NODE, NODE == nullptr>
+//////////////////////////////////////////////////////////////////////
+
+template <typename T, list_node<T> T::*NODE = nullptr> struct linked_list: list_base<T, NODE, NODE>
 {
-};
-
-template<typename T, list_node T::* NODE, bool is_member = true> struct linked_list
-{
-public:
-
-	linked_list()
-	{
-		root.next = root.prev = &root;
-	}
-
-	//////////////////////////////////////////////////////////////////////
-
-	void push_front(T *obj)
-	{
-		list_node &node = get_node(obj);
-		root.next->prev = &node;
-		node.next = root.next;
-		node.prev = &root;
-		root.next = &node;
-	}
-
-	//////////////////////////////////////////////////////////////////////
-
-	void push_front(T &obj)
-	{
-		list_node &node = get_node(&obj);
-		root.next->prev = &node;
-		node.next = root.next;
-		node.prev = &root;
-		root.next = &node;
-	}
-
-	//////////////////////////////////////////////////////////////////////
-
-	void push_back(T *obj)
-	{
-		list_node &node = get_node(obj);
-		node.prev = root.prev;
-		node.next = &root;
-		root.prev->next = &node;
-		root.prev = &node;
-	}
-
-	//////////////////////////////////////////////////////////////////////
-
-	void push_back(T &obj)
-	{
-		list_node &node = get_node(&obj);
-		node.prev = root.prev;
-		node.next = &root;
-		root.prev->next = &node;
-		root.prev = &node;
-	}
-
-	//////////////////////////////////////////////////////////////////////
-
-	void insert_before(T *pos, T *obj)
-	{
-		list_node &node = get_node(obj);
-		list_node &posn = get_node(pos);
-		posn.prev->next = &node;
-		node.prev = posn.prev;
-		posn.prev = &node;
-		node.next = &posn;
-	}
-
-	//////////////////////////////////////////////////////////////////////
-
-	void insert_before(T &pos, T &obj)
-	{
-		list_node &node = get_node(&obj);
-		list_node &posn = get_node(&pos);
-		posn.prev->next = &node;
-		node.prev = posn.prev;
-		posn.prev = &node;
-		node.next = &posn;
-	}
-
-	//////////////////////////////////////////////////////////////////////
-
-	void insert_after(T *pos, T *obj)
-	{
-		list_node &node = get_node(obj);
-		list_node &posn = get_node(pos);
-		posn.next->prev = node;
-		node.next = posn.next;
-		posn.next = &node;
-		node.prev = &posn;
-	}
-
-	//////////////////////////////////////////////////////////////////////
-
-	void insert_after(T &pos, T &obj)
-	{
-		list_node &node = get_node(&obj);
-		list_node &posn = get_node(&pos);
-		posn.next->prev = &node;
-		node.next = posn.next;
-		posn.next = &node;
-		node.prev = &posn;
-	}
-
-	//////////////////////////////////////////////////////////////////////
-
-	void remove(T *obj)
-	{
-		list_node &node = get_node(obj);
-		node.prev->next = node.next;
-		node.next->prev = node.prev;
-	}
-
-	//////////////////////////////////////////////////////////////////////
-
-	void remove(T &obj)
-	{
-		list_node &node = get_node(&obj);
-		node.prev->next = node.next;
-		node.next->prev = node.prev;
-	}
-
-	//////////////////////////////////////////////////////////////////////
-
-	T *pop_back()
-	{
-		list_node * const node = root.prev;
-		node->prev->next = node->next;
-		node->next->prev = node->prev;
-		return get_object(node);
-	}
-
-	//////////////////////////////////////////////////////////////////////
-
-	T *pop_front()
-	{
-		list_node * const node = root.next;
-		node->next->prev = node->prev;
-		node->prev->next = node->next;
-		return get_object(node);
-	}
-
-	//////////////////////////////////////////////////////////////////////
-
-	bool is_empty() const
-	{
-		return root.next == &root;
-	}
-
-	//////////////////////////////////////////////////////////////////////
+	typedef T obj_type;
+	typedef T *pointer;
+	typedef T const *const_pointer;
+	typedef T &ref;
+	typedef T const &const_ref;
 
 	void clear()
 	{
-		root.next = root.prev = &root;
+		ref root = root_object();
+		list_node_base<T> &node = get_node(root);
+		node.next = &root;
+		node.prev = &root;
 	}
 
-	//////////////////////////////////////////////////////////////////////
-
-	T * const head() const
+	void insert_before(pointer obj_before, pointer obj)
 	{
-		return get_object(root.next);
+		pointer &p = get_node(obj_before).prev;
+		list_node_base<T> &n = get_node(obj);
+		get_node(p).next = obj;
+		n.prev = p;
+		p = obj;
+		n.next = obj_before;
 	}
 
-	//////////////////////////////////////////////////////////////////////
-
-	T * const tail() const
+	void insert_after(pointer obj_after, pointer obj)
 	{
-		return get_object(root.prev);
+		pointer &n = get_node(obj_after).next;
+		list_node_base<T> &p = get_node(obj);
+		get_node(n).prev = obj;
+		p.next = n;
+		n = obj;
+		p.prev = obj_after;
 	}
 
-	//////////////////////////////////////////////////////////////////////
-
-	T const * const end()
+	pointer remove(pointer obj)
 	{
-		return get_object(&root);
+		pointer p = prev(obj);
+		pointer n = next(obj);
+		get_node(p).next = n;
+		get_node(n).prev = p;
+		return obj;
 	}
 
-	//////////////////////////////////////////////////////////////////////
+	linked_list() { clear(); }
 
-	T * const next(T *i) const
-	{
-		return get_object(get_node(i).next);
-	}
+	bool is_empty() const						{ const_ref root = root_object(); return get_node(root).next == &root; }
 
-	//////////////////////////////////////////////////////////////////////
+	pointer head()								{ return get_node(root_object()).next; }
+	const_pointer head() const					{ return get_node(root_object()).next; }
 
-	T * const prev(T *i) const
-	{
-		return get_object(get_node(i).prev);
-	}
+	pointer tail()								{ return get_node(root_object()).prev; }
+	const_pointer tail() const					{ return get_node(root_object()).prev; }
 
-	//////////////////////////////////////////////////////////////////////
+	pointer next(pointer obj)					{ return get_node(obj).next; }
+	const_pointer next(const_pointer obj) const	{ return get_node(obj).next; }
 
-	template <typename F> void remove_if(F &function)
-	{
-		for(T *i = head(); i != end(); i = next(i))
-		{
-			T *n = next(i);
-			if(function(i))
-			{
-				remove(i);
-			}
-			i = n;
-		}
-	}
+	pointer prev(pointer obj)					{ return get_node(obj).prev; }
+	const_pointer prev(const_pointer obj) const	{ return get_node(obj).prev; }
 
-	//////////////////////////////////////////////////////////////////////
+	const_pointer end() const					{ return &root_object(); }
 
-	template<typename F> void for_each(F &function)
-	{
-		for(T *i = head(); i != end(); i = next(i))
-		{
-			function(i);
-		}
-	}
+	void insert_before(ref obj_before, ref obj)	{ insert_before(&obj_before, &obj); }
+	void insert_after(ref obj_after, ref obj)	{ insert_after(&obj_after, &obj); }
 
-	//////////////////////////////////////////////////////////////////////
+	pointer remove(ref obj)						{ return remove(&obj); }
 
-	template<typename F> bool reverse_for_each(F &function)
-	{
-		for(T *i = tail(); i != end(); i = prev(i))
-		{
-			if(!function(i))
-			{
-				return false;
-			}
-		}
-		return true;
-	}
+	void push_back(ref obj)						{ insert_before(root_object(), obj); }
+	void push_back(pointer obj)					{ insert_before(root_object(), *obj); }
 
-	//////////////////////////////////////////////////////////////////////
+	void push_front(ref obj)					{ insert_after(root_object(), obj); }
+	void push_front(pointer obj)				{ insert_after(root_object(), *obj); }
 
-	template <typename F> T *find(F &function)
-	{
-		for(T *i = head(); i != end(); i = next(i))
-		{
-			if(function(i))
-			{
-				return i;
-			}
-		}
-		return nullptr;
-	}
-
-	//////////////////////////////////////////////////////////////////////
-
-	template <typename F> T *reverse_find(F &function)
-	{
-		for(T *i = tail(); i != end(); i = prev(i))
-		{
-			if(function(i))
-			{
-				return i;
-			}
-		}
-		return nullptr;
-	}
-
-	//////////////////////////////////////////////////////////////////////
-
-private:
-
-	static list_node const &get_node(T const *o)
-	{
-		return *reinterpret_cast<list_node const *>
-			(reinterpret_cast<char const *>(o)+offsetof(T, *NODE));
-	}
-
-	//////////////////////////////////////////////////////////////////////
-
-	static list_node &get_node(T *o)
-	{
-		return *reinterpret_cast<list_node *>
-			(reinterpret_cast<char *>(o)+offsetof(T, *NODE));
-	}
-
-	//////////////////////////////////////////////////////////////////////
-
-	static T const *get_object(list_node const *n)
-	{
-		return reinterpret_cast<T const *>
-			(reinterpret_cast<char const *>(n)-offsetof(T, *NODE));
-	}
-
-	//////////////////////////////////////////////////////////////////////
-
-	static T *get_object(list_node *n)
-	{
-		return reinterpret_cast<T *>
-			(reinterpret_cast<char *>(n)-offsetof(T, *NODE));
-	}
-
-	//////////////////////////////////////////////////////////////////////
-
-	list_node root;
-
-	//////////////////////////////////////////////////////////////////////
+	pointer pop_front()							{ return !is_empty() ? remove(head()) : nullptr; }
+	pointer pop_back()							{ return !is_empty() ? remove(tail()) : nullptr; }
 };
-

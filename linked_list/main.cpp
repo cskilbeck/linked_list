@@ -1,64 +1,105 @@
+//////////////////////////////////////////////////////////////////////
+
 #include <stdio.h>
-#include <random>
 #include "linked_list.h"
 
-#include <map>
+//////////////////////////////////////////////////////////////////////
 
-template<typename KEY, typename VALUE>
-bool find(const std::map<KEY, VALUE>& container, const KEY& key)
+struct foo: list_node<foo>
 {
-	typename std::map<KEY, VALUE>::const_iterator iterator = container.find(key);
-	return iter != container.end();
-}
+	foo(int n) : p(n)
+	{
+		lister.push_back(this);
+	}
+	~foo()
+	{
+		lister.remove(this);
+	}
+	int p;
+	list_node<foo> node;
+	list_node<foo> node2;
 
-struct foo
-{
-	foo(int n = 0) : i(n) { }
-
-	list_node node1;
-	list_node node2;
-	list_node node3;
-
-	int i;
+	linked_list<foo> lister;
 };
 
-linked_list<foo, &foo::node1> list1;
-linked_list<foo, &foo::node2> list2;
-linked_list<foo, &foo::node3> list3;
+//////////////////////////////////////////////////////////////////////
 
-template <typename T> void print_list(T &list, char const *message)
+linked_list<foo> list1;
+linked_list<foo, &foo::node> list2;
+
+//////////////////////////////////////////////////////////////////////
+
+template <typename T> int sum_list(T const &list)
 {
-	printf("%s\n", message);
-	list.for_each([] (foo *p)
+	int sum = 0;
+	for(T::const_pointer i = list.head(); i != list.end(); i = list.next(i))
 	{
-		printf(" %d\n", p->i);
-	});
-	puts("");
+		sum += i->p;
+	}
+	return sum;
 }
+
+//////////////////////////////////////////////////////////////////////
+
+template <typename T> void print_list(char const *h, T &list)
+{
+	printf("%s[", h);
+	char const *sep = "";
+	for(T::pointer i = list.head(); i != list.end(); i = list.next(i))
+	{
+		printf("%s%d", sep, i->p);
+		sep = ",";
+	}
+	printf("] = %d\n", sum_list(list));
+}
+
+//////////////////////////////////////////////////////////////////////
 
 int main(int, char **)
 {
-	foo foos[10];
+	foo a(1);
+	foo b(2);
+	foo c(3);
 
-	for(int i=0; i<10; ++i)
-	{
-		foos[i].i = i;
-		list1.push_back(&foos[i]);
-		list2.push_back(&foos[i]);
-	}
+	print_list("1", list1);
+	print_list("2", list2);
 
-	print_list(list1, "list1");
+	list1.push_front(a);
+	list1.push_front(b);
+	list1.push_front(c);
+	list2.push_front(a);
+	list2.push_front(b);
+	list2.push_front(c);
 
-	list2.remove(foos[2]);
+	list1.remove(b);
 
-	print_list(list2, "list2");
+	print_list("1", list1);
+	print_list("2", list2);
 
-	list2.remove_if([] (foo *p) { return p->i > 7; });
+	foo d(4);
+	list1.insert_after(a, d);
 
-	print_list(list2, "list2");
+	print_list("1", list1);
+	print_list("2", list2);
 
-	list3.push_back(foos[0]);
-	list3.push_back(foos[1]);
+	list1.remove(a);
+	list1.remove(b);
+
+	print_list("1", list1);
+	print_list("2", list2);
+
+	list1.remove(c);
+	list2.remove(c);
+
+	list1.insert_before(d, a);
+
+	print_list("1", list1);
+	print_list("2", list2);
+
+	list1.clear();
+
+	print_list("1", list1);
+	print_list("2", list2);
 
 	getchar();
 	return 0;
