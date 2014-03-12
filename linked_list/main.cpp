@@ -1,114 +1,65 @@
-//////////////////////////////////////////////////////////////////////
-
 #include <stdio.h>
-#include "linked_list.h"
+#include <stddef.h>
 
-//////////////////////////////////////////////////////////////////////
-
-struct foo: linked_list_node<foo>
+template <typename T> struct list_node_base
 {
-	foo(int n) : p(n)
-	{
-		lister.push_back(this);
-	}
-	~foo()
-	{
-		lister.remove(this);
-	}
-	int p;
-
-	linked_list_node<foo> node1;
-	linked_list_node<foo> node2;
-
-	static linked_list<foo> lister;
+	T *next;
+	T *prev;
 };
 
-//////////////////////////////////////////////////////////////////////
-
-linked_list<foo> foo::lister;
-
-linked_list<foo, &foo::node1> list1;
-linked_list<foo, &foo::node2> list2;
-
-//////////////////////////////////////////////////////////////////////
-
-template <typename T> int sum_list(T const &list)
+template <typename T>
+struct linked_list_node
 {
-	int sum = 0;
-	for(auto i = list.c_head(); i != list.end(); i = list.c_next(i))
-	{
-		sum += i->p;
-	}
-	return sum;
-}
+	list_node_base<T> list_node;
+};
 
-//////////////////////////////////////////////////////////////////////
-
-template <typename T> void print_list(char const *h, T &list)
+template <typename T, linked_list_node<T> T::*NODE, bool is_member>
+struct list_base
 {
-	printf("%s[", h);
-	char const *sep = "";
-	for(auto i = list.head(); i != list.end(); i = list.next(i))
+	template <typename A, typename B>
+	size_t offset_of(B A::*M)
 	{
-		printf("%s%d", sep, i->p);
-		sep = ",";
-	}
-	printf("] = %d\n", sum_list(list));
-}
+	    return reinterpret_cast<size_t>(&(((T*)0)->*M));
+	};
+};
 
-//////////////////////////////////////////////////////////////////////
+template <typename T, linked_list_node<T> T::*NODE>
+struct list_base<T, NODE, true> : linked_list_node<T>
+{
+	size_t offset()
+	{
+		return offset_of(&T::*NODE);
+	}
+};
+
+template <typename T, linked_list_node<T> T::*NODE>
+struct list_base<T, NODE, false> : linked_list_node<T>
+{
+	size_t offset()
+	{
+		return offset_of(&T::list_node);
+	}
+};
+
+template <typename T, linked_list_node<T> T::*NODE = nullptr>
+//struct linked_list : list_base<T, NODE, (linked_list_node<T> T::*)nullptr != NODE>
+struct linked_list : list_base<T, NODE, NODE>
+{
+};
+
+struct foo : linked_list_node<foo>
+{
+};
+
+struct bar
+{
+	linked_list_node<bar> node;
+};
+
+linked_list<foo> foo_list;
+linked_list<bar, &bar::node> bar_list;
 
 int main(int, char **)
 {
-	foo a(1);
-	foo b(2);
-	foo c(3);
-
-	print_list("1", list1);
-	print_list("2", list2);
-
-	list1.push_front(a);
-	list1.push_front(b);
-	list1.push_front(c);
-	list2.push_front(a);
-	list2.push_front(b);
-	list2.push_front(c);
-
-	list1.remove(b);
-
-	print_list("1", list1);
-	print_list("2", list2);
-
-	foo d(4);
-	list1.insert_after(a, d);
-
-	print_list("1", list1);
-	print_list("2", list2);
-
-	list1.remove(a);
-	list1.remove(b);
-
-	print_list("1", list1);
-	print_list("2", list2);
-
-	list1.remove(c);
-	list2.remove(c);
-
-	list1.insert_before(d, a);
-
-	print_list("1", list1);
-	print_list("2", list2);
-
-	list1.clear();
-
-	print_list("1", list1);
-	print_list("2", list2);
-
-	list1.pop_back();
-	list2.pop_front();
-
-	print_list("!", foo::lister);
-
-	getchar();
 	return 0;
 }
