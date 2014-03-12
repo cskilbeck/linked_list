@@ -35,7 +35,7 @@ linked_list<foo, &foo::node2> list2;
 template <typename T> int sum_list(T const &list)
 {
 	int sum = 0;
-	for(T::const_pointer i = list.head(); i != list.end(); i = list.next(i))
+	for(auto i = list.c_head(); i != list.end(); i = list.c_next(i))
 	{
 		sum += i->p;
 	}
@@ -48,7 +48,7 @@ template <typename T> void print_list(char const *h, T &list)
 {
 	printf("%s[", h);
 	char const *sep = "";
-	for(T::pointer i = list.head(); i != list.end(); i = list.next(i))
+	for(auto i = list.head(); i != list.end(); i = list.next(i))
 	{
 		printf("%s%d", sep, i->p);
 		sep = ",";
