@@ -4,6 +4,11 @@
 
 //////////////////////////////////////////////////////////////////////
 
+namespace chs
+{
+
+//////////////////////////////////////////////////////////////////////
+
 template <typename T>
 class list_node_base
 {
@@ -35,9 +40,10 @@ class list_base<T, NODE, true>
 	: protected linked_list_node<T>
 {
 protected:
-	static size_t const offset()
+	static size_t offset()
 	{
-		return (size_t)&reinterpret_cast<const volatile char &>(((T *)0)->*NODE);
+		linked_list_node<T> *b = &(((T *)0)->*NODE);
+		return size_t(&b->list_node);
 	}
 };
 
@@ -48,27 +54,40 @@ class list_base<T, NODE, false>
 	: protected linked_list_node<T>
 {
 protected:
-	static size_t const offset()
+	static size_t offset()
 	{
-		return (size_t)&reinterpret_cast<const volatile char &>(((T *)0)->list_node);
+		list_node_base<T> T::*n = static_cast<list_node_base<T> T::*>(&T::list_node);
+		return (size_t)(&(((T *)0)->*n));
 	}
 };
 
 //////////////////////////////////////////////////////////////////////
 
+#pragma push_macro("VC_WORKAROUND")
+#undef VC_WORKAROUND
+#if defined(_MSC_VER)
+#define VC_WORKAROUND NODE
+#else
+#define VC_WORKAROUND (linked_list_node<T> T::*)nullptr != NODE
+#endif
+
 template <typename T, linked_list_node<T> T::*NODE = nullptr>
-class linked_list
-	: protected list_base<T, NODE, NODE>
+class linked_list : protected list_base<T, NODE, VC_WORKAROUND>
 {
 public:
+
+	using list_base<T, NODE, VC_WORKAROUND>::offset;
+	using list_base<T, NODE, VC_WORKAROUND>::list_node;
+
+#pragma warning(push)
+#pragma warning(disable: 4602)
+#pragma pop_macro("VC_WORKAROUND")
+#pragma warning(pop)
 
 	typedef T *						pointer;
 	typedef T const *				const_pointer;
 	typedef T &						reference;
 	typedef T const &				const_reference;
-
-	// !! #include <iterator> before linked_list.h to get std::iterators defined (but not for push/pop operators)
-	#if defined(_ITERATOR_)
 
 	class iterator : std::iterator<std::bidirectional_iterator_tag, T>
 	{
@@ -150,8 +169,6 @@ public:
 		T const *p;
 	};
 
-	#endif //defined(_ITERATOR_)
-
 private:
 
 	typedef list_node_base<T>		node_t;
@@ -226,8 +243,6 @@ public:
 
 	bool				empty() const			{ return list_node.next == root(); }
 
-	#if defined(_ITERATOR_)
-
 	iterator			begin()	const			{ return iterator(list_node.next); }
 	const_iterator		cbegin() const			{ return const_iterator(list_node.next); }
 	reverse_iterator	rbegin() const			{ return reverse_iterator(list_node.next); }
@@ -236,8 +251,6 @@ public:
 	const_iterator		cend() const			{ return const_iterator(root()); }
 	iterator			rend()					{ return reverse_iterator(root()); }
 	const_reverse_iterator crend() const		{ return const_reverse_iterator(root()); }
-
-	#endif //defined(_ITERATOR_)
 
 	pointer				head()					{ return list_node.next; }
 	pointer				tail()					{ return list_node.prev; }
@@ -274,3 +287,5 @@ public:
 };
 
 //////////////////////////////////////////////////////////////////////
+
+} // chs
