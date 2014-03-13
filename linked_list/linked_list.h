@@ -21,8 +21,7 @@ namespace chs
 //////////////////////////////////////////////////////////////////////
 // base list node class, 2 pointers
 
-template <typename T>
-class list_node_base
+template <typename T> class list_node_base
 {
 public:
 	T *next;
@@ -32,8 +31,7 @@ public:
 //////////////////////////////////////////////////////////////////////
 // base node is wrapped so we can get the offset to it
 
-template <typename T>
-class linked_list_node
+template <typename T> class linked_list_node
 {
 public:
 	list_node_base<T> list_node;
@@ -42,17 +40,14 @@ public:
 //////////////////////////////////////////////////////////////////////
 // template base
 
-template <typename T, linked_list_node<T> T::*NODE, bool is_member>
-class list_base
+template <typename T, linked_list_node<T> T::*NODE, bool is_member> class list_base
 {
 };
 
 //////////////////////////////////////////////////////////////////////
 // specialization for instances using linked_list_node as member field
 
-template <typename T, linked_list_node<T> T::*NODE>
-class list_base<T, NODE, true>
-	: protected linked_list_node<T>
+template <typename T, linked_list_node<T> T::*NODE> class list_base<T, NODE, true> : protected linked_list_node<T>
 {
 protected:
 	static size_t offset()
@@ -65,10 +60,9 @@ protected:
 //////////////////////////////////////////////////////////////////////
 // specialization for instances deriving from linked_list_node
 
-template <typename T, linked_list_node<T> T::*NODE>
-class list_base<T, NODE, false>
-	: protected linked_list_node<T>
+template <typename T, linked_list_node<T> T::*NODE> class list_base<T, NODE, false> : protected linked_list_node<T>
 {
+	static_assert(!std::is_polymorphic<T>::value, "polymorphic! use the member-node version");
 protected:
 	static size_t offset()
 	{
@@ -80,9 +74,7 @@ protected:
 //////////////////////////////////////////////////////////////////////
 // the actual list
 
-template <typename T, linked_list_node<T> T::*NODE = nullptr>
-class linked_list
-	: protected list_base<T, NODE, VC_WORKAROUND>
+template <typename T, linked_list_node<T> T::*NODE = nullptr> class linked_list : protected list_base<T, NODE, VC_WORKAROUND>
 {
 public:
 
@@ -96,12 +88,10 @@ public:
 
 	#if !defined(_CHS_LINKED_LIST_DONT_DEFINE_STL_ITERATORS_)
 
-	typedef std::iterator<std::bidirectional_iterator_tag, T> iterbase;
+	typedef std::iterator<std::bidirectional_iterator_tag, T> iterator_base;
 
-	class const_iterator : iterbase
+	struct const_iterator : iterator_base
 	{
-	public:
-		const_iterator() {}
 		const_iterator(const_ptr t) : p(t) {}
 		const_iterator(const_iterator const &o) : p(o.p) {}
 		const_iterator const &operator=(const_iterator const &o) { p = o.p; return *this; }
@@ -112,13 +102,11 @@ public:
 		const_ref operator *() { return *p; }
 		const_ptr operator->() { return  p; }
 	private:
-		ptr p;
+		const_ptr p;
 	};
 
-	class iterator : iterbase
+	struct iterator : iterator_base
 	{
-	public:
-		iterator() {}
 		iterator(ptr t) : p(t) {}
 		iterator(const_ptr *t) : p(t) {}
 		iterator(iterator const &o) : p(o.p) {}
@@ -132,13 +120,10 @@ public:
 		ptr operator->() { return  p; }
 	private:
 		ptr p;
-		friend class const_iterator;
 	};
 
-	class const_reverse_iterator : iterbase
+	struct const_reverse_iterator : iterator_base
 	{
-	public:
-		const_reverse_iterator() {}
 		const_reverse_iterator(const_ptr t) : p(t) {}
 		const_reverse_iterator(const_reverse_iterator const &o) : p(o.p) {}
 		const_reverse_iterator const &operator=(const_reverse_iterator const &o) { p = o.p; return o; }
@@ -149,13 +134,11 @@ public:
 		const_ref operator *() { return *p; }
 		const_ptr operator->() { return  p; }
 	private:
-		ptr p;
+		const_ptr p;
 	};
 
-	class reverse_iterator : iterbase
+	struct reverse_iterator : iterator_base
 	{
-	public:
-		reverse_iterator() {}
 		reverse_iterator(ptr t) : p(t) {}
 		reverse_iterator(const_ptr t) : p(t) {}
 		reverse_iterator(reverse_iterator const &o) : p(o.p) {}
@@ -169,10 +152,11 @@ public:
 		ptr operator->() { return  p; }
 	private:
 		ptr p;
-		friend class const_reverse_iterator;
 	};
 
-	iterator				begin()	const	{ return iterator(list_node.next); }
+	iterator				begin()			{ return iterator(list_node.next); }
+	const_iterator			begin()	const	{ return const_iterator(list_node.next); }
+
 	iterator				end()			{ return iterator(rootp()); }
 	const_iterator			end() const		{ return const_iterator(root()); }
 
