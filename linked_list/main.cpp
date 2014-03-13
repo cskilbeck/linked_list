@@ -3,9 +3,6 @@
 #include <stdio.h>
 #include <iterator>
 #include <algorithm>
-
-#define _CHS_LINKED_LIST_DONT_DEFINE_STL_ITERATORS_
-
 #include "linked_list.h"
 
 using chs::linked_list;
@@ -58,13 +55,13 @@ template <typename T> void print_list(char const *h, T &list)
 	printf("%s[", h);
 	char const *sep = "";
 
-	//for(auto i = list.head(); i != list.done(); i = list.next(i))
+	//for(typename T::pointer i = list.head(); i != list.done(); i = list.next(i))
 	//{
 	//	printf("%s%d", sep, i->p);
 	//	sep = ",";
 	//}
 
-	for(auto i = list.begin(); i != list.end(); ++i)
+	for(auto i = list.cbegin(); i != list.cend(); ++i)
 	{
 		printf("%s%d", sep, i->p);
 		sep = ",";
