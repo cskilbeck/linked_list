@@ -14,23 +14,22 @@ struct foo: linked_list_node<foo>
 {
 	foo(int n) : p(n)
 	{
-		lister.push_back(this);
+		list0.push_back(this);
 	}
 	~foo()
 	{
-		lister.remove(this);
+		list0.remove(this);
 	}
 	int p;
 
+	static linked_list<foo> list0;
 	linked_list_node<foo> node1;
 	linked_list_node<foo> node2;
-
-	static linked_list<foo> lister;
 };
 
 //////////////////////////////////////////////////////////////////////
 
-linked_list<foo> foo::lister;
+linked_list<foo> foo::list0;
 
 linked_list<foo, &foo::node1> list1;
 linked_list<foo, &foo::node2> list2;
@@ -40,10 +39,9 @@ linked_list<foo, &foo::node2> list2;
 template <typename T> int sum_list(T &list)
 {
 	int sum = 0;
-	for(T::pointer i = list.head(); i != list.done(); i = list.next(i))
-//	for(auto i = list.crbegin(); i != list.crend(); ++i)
+	for(auto &i : list)
 	{
-		sum += i->p;
+		sum += i.p;
 	}
 	return sum;
 }
@@ -54,30 +52,11 @@ template <typename T> void print_list(char const *h, T &list)
 {
 	printf("%s[", h);
 	char const *sep = "";
-
-	//for(typename T::pointer i = list.head(); i != list.done(); i = list.next(i))
-	//{
-	//	printf("%s%d", sep, i->p);
-	//	sep = ",";
-	//}
-
-	for(auto i = list.cbegin(); i != list.cend(); ++i)
+	for(auto const &i : list)
 	{
-		printf("%s%d", sep, i->p);
+		printf("%s%d", sep, i.p);
 		sep = ",";
 	}
-
-	//for(auto i: list)
-	//{
-	//	printf("%s%d", sep, i.p);
-	//	sep = ",";
-	//}
-
-	//std::for_each(list.begin(), list.end(), [&] (T::ref i) {
-	//	printf("%s%d", sep, i.p);
-	//	sep = ",";
-	//});
-
 	printf("] = %d\n", sum_list(list));
 }
 
@@ -85,56 +64,32 @@ template <typename T> void print_list(char const *h, T &list)
 
 int main(int, char **)
 {
-	foo a(1);
-	foo b(2);
-	foo c(3);
+	{
+		foo a(1);
+		foo b(2);
+		foo c(3);
 
-	int t = sum_list(list1);
+		print_list("0", foo::list0);
 
-	print_list("1", list1);
-	print_list("2", list2);
+		list1.push_back(a);
+		list1.push_back(b);
+		list1.push_back(c);
 
-	list1.push_front(a);
-	list1.push_front(b);
-	list1.push_front(c);
-	list2.push_front(a);
-	list2.push_front(b);
-	list2.push_front(c);
+		print_list("1", list1);
 
-	list1.remove(b);
+		list1.remove(&a);
+		list1.remove(&b);
+		list1.remove(&c);
 
-	print_list("1", list1);
-	print_list("2", list2);
+		auto bob = std::begin(list1);
+		if(bob != std::end(list1))
+		{
+			printf("!");
+		}
+	}
 
-	foo d(4);
-	list1.insert_after(a, d);
-
-	print_list("1", list1);
-	print_list("2", list2);
-
-	list1.remove(a);
-	list1.remove(b);
-
-	print_list("1", list1);
-	print_list("2", list2);
-
-	list1.remove(c);
-	list2.remove(c);
-
-	list1.insert_before(d, a);
-
-	print_list("1", list1);
-	print_list("2", list2);
-
-	list1.clear();
-
-	print_list("1", list1);
-	print_list("2", list2);
-
-	list1.pop_back();
-	list2.pop_front();
-
-	print_list("!", foo::lister);
+	print_list("~1", list1);
+	print_list("~0", foo::list0);
 
 	getchar();
 	return 0;

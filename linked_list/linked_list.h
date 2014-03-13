@@ -2,6 +2,9 @@
 
 #pragma once
 
+// Deal with MSVC internal compiler error
+// this can be removed when a fix is available
+
 #pragma push_macro("VC_WORKAROUND")
 #undef VC_WORKAROUND
 #if defined(_MSC_VER)
@@ -16,6 +19,7 @@ namespace chs
 {
 
 //////////////////////////////////////////////////////////////////////
+// base list node class, 2 pointers
 
 template <typename T>
 class list_node_base
@@ -26,6 +30,7 @@ public:
 };
 
 //////////////////////////////////////////////////////////////////////
+// base node is wrapped so we can get the offset to it
 
 template <typename T>
 class linked_list_node
@@ -35,6 +40,7 @@ public:
 };
 
 //////////////////////////////////////////////////////////////////////
+// template base
 
 template <typename T, linked_list_node<T> T::*NODE, bool is_member>
 class list_base
@@ -42,6 +48,7 @@ class list_base
 };
 
 //////////////////////////////////////////////////////////////////////
+// specialization for instances using linked_list_node as member field
 
 template <typename T, linked_list_node<T> T::*NODE>
 class list_base<T, NODE, true>
@@ -56,6 +63,7 @@ protected:
 };
 
 //////////////////////////////////////////////////////////////////////
+// specialization for instances deriving from linked_list_node
 
 template <typename T, linked_list_node<T> T::*NODE>
 class list_base<T, NODE, false>
@@ -70,6 +78,7 @@ protected:
 };
 
 //////////////////////////////////////////////////////////////////////
+// the actual list
 
 template <typename T, linked_list_node<T> T::*NODE = nullptr>
 class linked_list
@@ -80,152 +89,151 @@ public:
 	using list_base<T, NODE, VC_WORKAROUND>::offset;
 	using list_base<T, NODE, VC_WORKAROUND>::list_node;
 
-	typedef T *						pointer;
-	typedef T const *				const_pointer;
-	typedef T &						reference;
-	typedef T const &				const_reference;
+	typedef T *			ptr;
+	typedef T const *	const_ptr;
+	typedef T &			ref;
+	typedef T const &	const_ref;
 
 	#if !defined(_CHS_LINKED_LIST_DONT_DEFINE_STL_ITERATORS_)
 
-	class const_iterator : std::iterator<std::bidirectional_iterator_tag, T>
+	typedef std::iterator<std::bidirectional_iterator_tag, T> iterbase;
+
+	class const_iterator : iterbase
 	{
 	public:
-		const_iterator() : p(nullptr) { }
-		const_iterator(T const *t) : p(t) { }
-		const_iterator(const_iterator const &o) : p(o.p) { }
-		const_iterator const &operator=(const_iterator const &o) { p = o.p; return o; }
-		const_iterator const &operator=(iterator const &o) { p = o.p; return o; }
+		const_iterator() {}
+		const_iterator(const_ptr t) : p(t) {}
+		const_iterator(const_iterator const &o) : p(o.p) {}
+		const_iterator const &operator=(const_iterator const &o) { p = o.p; return *this; }
 		const_iterator &operator++() { p = node(p).next; return *this; }
 		const_iterator &operator--() { p = node(p).prev; return *this; }
-		const_iterator operator++(int) { const_iterator t(*this); p = node(p).next; return t; }
-		const_iterator operator--(int) { const_iterator t(*this); p = node(p).prev; return t; }
 		bool operator==(const_iterator const &o) { return p == o.p; }
 		bool operator!=(const_iterator const &o) { return p != o.p; }
-		T const &operator *() { return *p; }
-		T const *operator->() { return  p; }
+		const_ref operator *() { return *p; }
+		const_ptr operator->() { return  p; }
 	private:
-		T const *p;
+		ptr p;
 	};
 
-	class iterator : std::iterator<std::bidirectional_iterator_tag, T>
+	class iterator : iterbase
 	{
 	public:
-		iterator() : p(nullptr) { }
-		iterator(T *t) : p(t) { }
-		iterator(iterator const &o) : p(o.p) { }
-		iterator const &operator=(iterator const &o) { p = o.p; return o; }
-		iterator const &operator=(const_iterator const &o) { p = o.p; return o; }
+		iterator() {}
+		iterator(ptr t) : p(t) {}
+		iterator(const_ptr *t) : p(t) {}
+		iterator(iterator const &o) : p(o.p) {}
+		iterator const &operator=(const_iterator const &o) { p = o.p; return *this; }
+		iterator const &operator=(iterator const &o) { p = o.p; return *this; }
 		iterator &operator++() { p = node(p).next; return *this; }
 		iterator &operator--() { p = node(p).prev; return *this; }
-		iterator operator++(int) { iterator t(*this); p = node(p).next; return t; }
-		iterator operator--(int) { iterator t(*this); p = node(p).prev; return t; }
 		bool operator==(iterator const &o) { return p == o.p; }
 		bool operator!=(iterator const &o) { return p != o.p; }
-		T &operator *() { return *p; }
-		T *operator->() { return  p; }
+		ref operator *() { return *p; }
+		ptr operator->() { return  p; }
 	private:
-		T *p;
+		ptr p;
 		friend class const_iterator;
 	};
 
-	class const_reverse_iterator : std::iterator<std::bidirectional_iterator_tag, T>
+	class const_reverse_iterator : iterbase
 	{
 	public:
-		const_reverse_iterator() : p(nullptr) { }
-		const_reverse_iterator(T const *t) : p(t) { }
-		const_reverse_iterator(const_reverse_iterator const &o) : p(o.p) { }
+		const_reverse_iterator() {}
+		const_reverse_iterator(const_ptr t) : p(t) {}
+		const_reverse_iterator(const_reverse_iterator const &o) : p(o.p) {}
 		const_reverse_iterator const &operator=(const_reverse_iterator const &o) { p = o.p; return o; }
 		const_reverse_iterator &operator++() { p = node(p).prev; return *this; }
 		const_reverse_iterator &operator--() { p = node(p).next; return *this; }
-		const_reverse_iterator operator++(int) { const_reverse_iterator t(*this); p = node(p).prev; return t; }
-		const_reverse_iterator operator--(int) { const_reverse_iterator t(*this); p = node(p).next; return t; }
 		bool operator==(const_reverse_iterator const &o) { return p == o.p; }
 		bool operator!=(const_reverse_iterator const &o) { return p != o.p; }
-		T const &operator *() { return *p; }
-		T const *operator->() { return  p; }
+		const_ref operator *() { return *p; }
+		const_ptr operator->() { return  p; }
 	private:
-		T const *p;
+		ptr p;
 	};
 
-	class reverse_iterator : std::iterator<std::bidirectional_iterator_tag, T>
+	class reverse_iterator : iterbase
 	{
 	public:
-		reverse_iterator() : p(nullptr) { }
-		reverse_iterator(T *t) : p(t) { }
-		reverse_iterator(reverse_iterator const &o) : p(o.p) { }
-		reverse_iterator const &operator=(const_reverse_iterator const &o) { p = o.p; return o; }
-		reverse_iterator const &operator=(reverse_iterator const &o) { p = o.p; return o; }
+		reverse_iterator() {}
+		reverse_iterator(ptr t) : p(t) {}
+		reverse_iterator(const_ptr t) : p(t) {}
+		reverse_iterator(reverse_iterator const &o) : p(o.p) {}
+		reverse_iterator const &operator=(const_reverse_iterator const &o) { p = o.p; return *this; }
+		reverse_iterator const &operator=(reverse_iterator const &o) { p = o.p; return *this; }
 		reverse_iterator &operator++() { p = node(p).prev; return *this; }
 		reverse_iterator &operator--() { p = node(p).next; return *this; }
-		reverse_iterator operator++(int) { reverse_iterator t(*this); p = node(p).prev; return t; }
-		reverse_iterator operator--(int) { reverse_iterator t(*this); p = node(p).next; return t; }
 		bool operator==(reverse_iterator const &o) { return p == o.p; }
 		bool operator!=(reverse_iterator const &o) { return p != o.p; }
-		T &operator *() { return *p; }
-		T *operator->() { return  p; }
+		ref operator *() { return *p; }
+		ptr operator->() { return  p; }
 	private:
-		T *p;
+		ptr p;
 		friend class const_reverse_iterator;
 	};
 
 	iterator				begin()	const	{ return iterator(list_node.next); }
-	iterator				end()			{ return iterator(root()); }
+	iterator				end()			{ return iterator(rootp()); }
+	const_iterator			end() const		{ return const_iterator(root()); }
 
 	const_iterator			cbegin() const	{ return const_iterator(list_node.next); }
 	const_iterator			cend() const	{ return const_iterator(root()); }
 
 	reverse_iterator		rbegin() const	{ return reverse_iterator(list_node.prev); }
-	reverse_iterator		rend()			{ return reverse_iterator(root()); }
+	reverse_iterator		rend() const	{ return reverse_iterator(rootp()); }
 
 	const_reverse_iterator	crbegin() const	{ return const_reverse_iterator(list_node.prev); }
 	const_reverse_iterator	crend() const	{ return const_reverse_iterator(root()); }
 
 	#endif //!defined(_CHS_LINKED_LIST_DONT_DEFINE_STL_ITERATORS_)
 
+	typedef T						value_type;
+
 private:
 
 	typedef list_node_base<T>		node_t;
-	typedef node_t *				node_pointer;
+	typedef node_t *				node_ptr;
 	typedef node_t &				node_ref;
 	typedef list_node_base<T> const	const_node_t;
-	typedef const_node_t *			const_node_pointer;
+	typedef const_node_t *			const_node_ptr;
 	typedef const_node_t &			const_node_ref;
 
-	static node_ref node(pointer obj)
+	// get an object's node
+	static node_ref node(ptr obj)
 	{
-		return *reinterpret_cast<node_pointer>
-			(reinterpret_cast<char *>(obj) + offset());
+		return *reinterpret_cast<node_ptr>(reinterpret_cast<char *>(obj) + offset());
 	}
 
-	static const_node_ref node(const_pointer obj)
+	static const_node_ref node(const_ptr obj)
 	{
-		return *reinterpret_cast<const_node_pointer>
-			(reinterpret_cast<char const *>(obj) + offset());
+		return *reinterpret_cast<const_node_ptr>(reinterpret_cast<char const *>(obj) + offset());
 	}
 
-	pointer root()
+	ptr rootp()
 	{
-		return reinterpret_cast<pointer>
-			(reinterpret_cast<char *>(&list_node) - offset());
+		return reinterpret_cast<ptr>(reinterpret_cast<char *>(&list_node) - offset());
 	}
 
-	const_pointer root() const
+	const_ptr root() const
 	{
-		return reinterpret_cast<const_pointer>
-			(reinterpret_cast<char const *>(&list_node) - offset());
+		return reinterpret_cast<const_ptr>(reinterpret_cast<char const *>(&list_node) - offset());
 	}
 
 public:
 
+	// basic operations
+
+	// make the list empty
 	void clear()
 	{
-		list_node.next = root();
-		list_node.prev = root();
+		list_node.next = rootp();
+		list_node.prev = rootp();
 	}
 
-	void insert_before(pointer obj_before, pointer obj)
+	// insert an object before another object
+	void insert_before(ptr obj_before, ptr obj)
 	{
-		pointer &p = node(obj_before).prev;
+		ptr &p = node(obj_before).prev;
 		node_ref n = node(obj);
 		node(p).next = obj;
 		n.prev = p;
@@ -233,9 +241,10 @@ public:
 		n.next = obj_before;
 	}
 
-	void insert_after(pointer obj_after, pointer obj)
+	// insert an object after another object
+	void insert_after(ptr obj_after, ptr obj)
 	{
-		pointer &n = node(obj_after).next;
+		ptr &n = node(obj_after).next;
 		node_ref p = node(obj);
 		node(n).prev = obj;
 		p.next = n;
@@ -243,50 +252,58 @@ public:
 		p.prev = obj_after;
 	}
 
-	pointer remove(pointer obj)
+	// remove an object from the list
+	ptr remove(ptr obj)
 	{
-		pointer p = prev(obj);
-		pointer n = next(obj);
+		ptr p = prev(obj);
+		ptr n = next(obj);
 		node(p).next = n;
 		node(n).prev = p;
 		return obj;
 	}
 
-						linked_list()			{ clear(); }
+	linked_list()
+	{
+		clear();
+	}
 
-	bool				empty() const			{ return list_node.next == root(); }
+	bool empty() const
+	{
+		return list_node.next == root();
+	}
 
-	pointer				head()					{ return list_node.next; }
-	pointer				tail()					{ return list_node.prev; }
+	// non-stl style iteration using T* and T const *
 
-	const_pointer		c_head() const			{ return list_node.next; }
-	const_pointer		c_tail() const			{ return list_node.prev; }
+	ptr			head()							{ return list_node.next; }
+	ptr			tail()							{ return list_node.prev; }
 
-	pointer				next(pointer obj)		{ return node(obj).next; }
-	pointer				prev(pointer obj)		{ return node(obj).prev; }
+	const_ptr	c_head() const					{ return list_node.next; }
+	const_ptr	c_tail() const					{ return list_node.prev; }
 
-	const_pointer		c_next(const_pointer obj) const	{ return node(obj).next; }
-	const_pointer		c_prev(const_pointer obj) const	{ return node(obj).prev; }
+	ptr			next(ptr obj)					{ return node(obj).next; }
+	ptr			prev(ptr obj)					{ return node(obj).prev; }
 
-	pointer				done()					{ return root(); }
-	const_pointer		c_done() const			{ return root(); }
+	const_ptr	c_next(const_ptr obj) const		{ return node(obj).next; }
+	const_ptr	c_prev(const_ptr obj) const		{ return node(obj).prev; }
 
-	pointer				remove(reference obj)	{ return remove(&obj); }
+	ptr			done()							{ return root(); }
+	const_ptr	c_done() const					{ return root(); }
 
-	void				push_back(reference obj){ insert_before(*root(), obj); }
-	void				push_back(pointer obj)	{ insert_before(root(), obj); }
+	// all these operations rely on the basic operations
 
-	void				push_front(reference obj){ insert_after(*root(), obj); }
-	void				push_front(pointer obj)	{ insert_after(root(), *obj); }
+	ptr			remove(ref obj)					{ return remove(&obj); }
+													
+	void		push_back(ref obj)				{ insert_before(*rootp(), obj); }
+	void		push_back(ptr obj)				{ insert_before(rootp(), obj); }
+													
+	void		push_front(ref obj)				{ insert_after(*rootp(), obj); }
+	void		push_front(ptr obj)				{ insert_after(rootp(), obj); }
+													
+	ptr			pop_front()						{ return !empty() ? remove(head()) : nullptr; }
+	ptr			pop_back()						{ return !empty() ? remove(tail()) : nullptr; }
 
-	pointer				pop_front()				{ return !empty() ? remove(head()) : nullptr; }
-	pointer				pop_back()				{ return !empty() ? remove(tail()) : nullptr; }
-
-	void				insert_before(reference obj_before, reference obj)
-												{ insert_before(&obj_before, &obj); }
-
-	void				insert_after(reference obj_after, reference obj)
-												{ insert_after(&obj_after, &obj); }
+	void		insert_before(ref bef, ref obj)	{ insert_before(&bef, &obj); }
+	void		insert_after(ref aft, ref obj)	{ insert_after(&aft, &obj); }
 
 };
 
@@ -295,7 +312,7 @@ public:
 } // chs
 
 #pragma warning(push)
-#pragma warning(disable: 4602)
+#pragma warning(disable: 4602)		// disable spurious warning
 #pragma pop_macro("VC_WORKAROUND")
 #pragma warning(pop)
 
