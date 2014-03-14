@@ -51,7 +51,7 @@ template <typename T> string get(T const &list)
 
 template <typename T> void print_list(char const *h, T const &list)
 {
-    printf("$s [%s]\n", h, get(list).c_str());
+    printf("%s [%s]\n", h, get(list).c_str());
 }
 
 //////////////////////////////////////////////////////////////////////
