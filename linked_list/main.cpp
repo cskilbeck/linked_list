@@ -7,11 +7,11 @@
 #include "linked_list.h"
 
 using chs::linked_list;
-using chs::linked_list_node;
+using chs::list_node;
 
 //////////////////////////////////////////////////////////////////////
 
-struct foo
+struct foo : list_node<foo>
 {
 	foo(char n) : p(n)
 	{
@@ -19,16 +19,18 @@ struct foo
 	~foo()
 	{
 	}
-	virtual void knob()
+	void knob()
 	{
 	}
 	char p;
 
-	linked_list_node<foo> node1;
-	linked_list_node<foo> node2;
+	list_node<foo> node1;
+	list_node<foo> node2;
 };
 
 //////////////////////////////////////////////////////////////////////
+
+linked_list<foo> list0;
 
 linked_list<foo, &foo::node1> list1;
 linked_list<foo, &foo::node2> list2;
