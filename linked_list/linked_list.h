@@ -161,14 +161,14 @@ public:
     iterator                  end()           { return iterator(root()); }
     const_iterator            end() const     { return const_iterator(const_root()); }
 
-	reverse_iterator          rend()          { return reverse_iterator(root()); }
-	const_reverse_iterator    rend() const    { return const_reverse_iterator(const_root()); }
+    reverse_iterator          rend()          { return reverse_iterator(root()); }
+    const_reverse_iterator    rend() const    { return const_reverse_iterator(const_root()); }
 
     const_iterator            cbegin() const  { return const_iterator(node.next); }
     const_iterator            cend() const    { return const_iterator(const_root()); }
 
     const_reverse_iterator    crbegin() const { return const_reverse_iterator(node.prev); }
-	const_reverse_iterator    crend() const   { return const_reverse_iterator(const_root()); }
+    const_reverse_iterator    crend() const   { return const_reverse_iterator(const_root()); }
 
     #endif //!defined(_CHS_LINKED_LIST_DONT_DEFINE_STL_ITERATORS_)
 
@@ -303,7 +303,7 @@ template<class T> struct in_reverse
 
 template<class T> in_reverse<T> reverse(T &l)
 {
-	return in_reverse<T>(l);
+    return in_reverse<T>(l);
 }
 
 //////////////////////////////////////////////////////////////////////
