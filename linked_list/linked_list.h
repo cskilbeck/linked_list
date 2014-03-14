@@ -79,9 +79,9 @@ public:
     using list_base<T, NODE, VC_WORKAROUND>::offset;
     using list_base<T, NODE, VC_WORKAROUND>::node;
 
-    typedef T *            ptr;
+    typedef T *          ptr;
     typedef T const *    const_ptr;
-    typedef T &            ref;
+    typedef T &          ref;
     typedef T const &    const_ref;
 
     #if !defined(_CHS_LINKED_LIST_DONT_DEFINE_STL_ITERATORS_)
@@ -155,17 +155,20 @@ public:
     iterator                  begin()         { return iterator(node.next); }
     const_iterator            begin() const   { return const_iterator(node.next); }
 
+    reverse_iterator          rbegin()        { return reverse_iterator(node.prev); }
+    const_reverse_iterator    rbegin() const  { return const_reverse_iterator(node.prev); }
+
     iterator                  end()           { return iterator(root()); }
     const_iterator            end() const     { return const_iterator(const_root()); }
+
+	reverse_iterator          rend()          { return reverse_iterator(root()); }
+	const_reverse_iterator    rend() const    { return const_reverse_iterator(const_root()); }
 
     const_iterator            cbegin() const  { return const_iterator(node.next); }
     const_iterator            cend() const    { return const_iterator(const_root()); }
 
-    reverse_iterator          rbegin() const  { return reverse_iterator(node.prev); }
-    reverse_iterator          rend() const    { return reverse_iterator(root()); }
-
     const_reverse_iterator    crbegin() const { return const_reverse_iterator(node.prev); }
-    const_reverse_iterator    crend() const   { return const_reverse_iterator(const_root()); }
+	const_reverse_iterator    crend() const   { return const_reverse_iterator(const_root()); }
 
     #endif //!defined(_CHS_LINKED_LIST_DONT_DEFINE_STL_ITERATORS_)
 
@@ -286,6 +289,22 @@ public:
     void      insert_after(ref aft, ref obj)  { insert_after(&aft, &obj); }
 
 };
+
+//////////////////////////////////////////////////////////////////////
+// reverse_iterator helper
+
+template<class T> struct in_reverse
+{
+    T const &l;
+    in_reverse(T const &list) : l(list) {}
+    auto begin() -> decltype(l.rbegin()) const { return l.rbegin(); } 
+    auto end() -> decltype(l.rend()) const  { return l.rend(); } 
+};
+
+template<class T> in_reverse<T> reverse(T &l)
+{
+	return in_reverse<T>(l);
+}
 
 //////////////////////////////////////////////////////////////////////
 
