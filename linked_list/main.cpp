@@ -41,7 +41,7 @@ template <typename T> string get(T const &list)
 {
 	string result;
 	for(auto const &i: list)
-	{
+    {
 		result += i.p;
 	}
 	return result;
