@@ -13,19 +13,19 @@ using chs::list_node;
 
 struct foo : list_node<foo>
 {
-	foo(char n) : p(n)
-	{
-	}
-	~foo()
-	{
-	}
-	void knob()
-	{
-	}
-	char p;
+    foo(char n) : p(n)
+    {
+    }
+    ~foo()
+    {
+    }
+    void knob()
+    {
+    }
+    char p;
 
-	list_node<foo> node1;
-	list_node<foo> node2;
+    list_node<foo> node1;
+    list_node<foo> node2;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -39,24 +39,24 @@ using std::string;
 
 template <typename T> string get(T const &list)
 {
-	string result;
-	for(auto const &i: list)
+    string result;
+    for(auto const &i: list)
     {
-		result += i.p;
-	}
-	return result;
+        result += i.p;
+    }
+    return result;
 }
 
 //////////////////////////////////////////////////////////////////////
 
 template <typename T> void print_list(char const *h, T const &list)
 {
-	printf("[%s]\n", get(list).c_str());
+    printf("$s [%s]\n", h, get(list).c_str());
 }
 
 //////////////////////////////////////////////////////////////////////
 // NODE, MEMBER
-// ref				ptr
+// ref              ptr
 //
 // push_back
 // push_front
@@ -69,25 +69,23 @@ template <typename T> void print_list(char const *h, T const &list)
 
 int main(int, char **)
 {
-	{
-		foo a('a');
-		foo b('b');
-		foo c('c');
+    foo a('a');
+    foo b('b');
+    foo c('c');
 
-		list1.push_back(a);
-		list1.push_back(b);
-		list1.push_back(c);
+    list1.push_back(a);
+    list1.push_back(b);
+    list1.push_back(c);
 
-		print_list("1", list1);
+    print_list("1", list1);
 
-		list1.remove(&a);
-		list1.remove(&b);
-		list1.remove(&c);
-	}
+    list1.remove(&a);
+    list1.remove(&b);
+    list1.remove(&c);
 
-	print_list("~1", list1);
+    print_list("~1", list1);
 
-	getchar();
-	return 0;
+    getchar();
+    return 0;
 }
 
