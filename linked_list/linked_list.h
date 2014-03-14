@@ -155,17 +155,17 @@ public:
     iterator                  begin()         { return iterator(node.next); }
     const_iterator            begin() const   { return const_iterator(node.next); }
 
-    iterator                  end()           { return iterator(rootp()); }
-    const_iterator            end() const     { return const_iterator(root()); }
+    iterator                  end()           { return iterator(root()); }
+    const_iterator            end() const     { return const_iterator(const_root()); }
 
     const_iterator            cbegin() const  { return const_iterator(node.next); }
-    const_iterator            cend() const    { return const_iterator(root()); }
+    const_iterator            cend() const    { return const_iterator(const_root()); }
 
     reverse_iterator          rbegin() const  { return reverse_iterator(node.prev); }
-    reverse_iterator          rend() const    { return reverse_iterator(rootp()); }
+    reverse_iterator          rend() const    { return reverse_iterator(root()); }
 
     const_reverse_iterator    crbegin() const { return const_reverse_iterator(node.prev); }
-    const_reverse_iterator    crend() const   { return const_reverse_iterator(root()); }
+    const_reverse_iterator    crend() const   { return const_reverse_iterator(const_root()); }
 
     #endif //!defined(_CHS_LINKED_LIST_DONT_DEFINE_STL_ITERATORS_)
 
@@ -189,12 +189,12 @@ private:
         return *reinterpret_cast<const_node_ptr>(reinterpret_cast<char const *>(obj) + offset());
     }
 
-    ptr rootp()
+    ptr root()
     {
         return reinterpret_cast<ptr>(reinterpret_cast<char *>(&node) - offset());
     }
 
-    const_ptr root() const
+    const_ptr const_root() const
     {
         return reinterpret_cast<const_ptr>(reinterpret_cast<char const *>(&node) - offset());
     }
@@ -206,8 +206,8 @@ public:
     // make the list empty
     void clear()
     {
-        node.next = rootp();
-        node.prev = rootp();
+        node.next = root();
+        node.prev = root();
     }
 
     // insert an object before another object
@@ -249,7 +249,7 @@ public:
 
     bool empty() const
     {
-        return node.next == root();
+        return node.next == const_root();
     }
 
     // non-stl style iteration using T* and T const *
@@ -266,18 +266,18 @@ public:
     const_ptr c_next(const_ptr obj) const    { return get_node(obj).next; }
     const_ptr c_prev(const_ptr obj) const    { return get_node(obj).prev; }
 
-    ptr       done()                         { return root(); }
-    const_ptr c_done() const                 { return root(); }
+    ptr       done()                         { return const_root(); }
+    const_ptr c_done() const                 { return const_root(); }
 
     // all these operations rely on the basic operations
 
     ptr       remove(ref obj)                 { return remove(&obj); }
                                                     
-    void      push_back(ref obj)              { insert_before(*rootp(), obj); }
-    void      push_back(ptr obj)              { insert_before(rootp(), obj); }
+    void      push_back(ref obj)              { insert_before(*root(), obj); }
+    void      push_back(ptr obj)              { insert_before(root(), obj); }
                                                     
-    void      push_front(ref obj)             { insert_after(*rootp(), obj); }
-    void      push_front(ptr obj)             { insert_after(rootp(), obj); }
+    void      push_front(ref obj)             { insert_after(*root(), obj); }
+    void      push_front(ptr obj)             { insert_after(root(), obj); }
                                                     
     ptr       pop_front()                     { return empty() ? nullptr : remove(head()) }
     ptr       pop_back()                      { return empty() ? nullptr : remove(tail()) }
