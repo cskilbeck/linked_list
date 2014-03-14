@@ -282,8 +282,8 @@ public:
     void      push_front(ref obj)             { insert_after(*root(), obj); }
     void      push_front(ptr obj)             { insert_after(root(), obj); }
                                                     
-    ptr       pop_front()                     { return empty() ? nullptr : remove(head()) }
-    ptr       pop_back()                      { return empty() ? nullptr : remove(tail()) }
+    ptr       pop_front()                     { return empty() ? nullptr : remove(head()); }
+    ptr       pop_back()                      { return empty() ? nullptr : remove(tail()); }
 
     void      insert_before(ref bef, ref obj) { insert_before(&bef, &obj); }
     void      insert_after(ref aft, ref obj)  { insert_after(&aft, &obj); }
