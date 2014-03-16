@@ -66,16 +66,18 @@ int main(int, char **)
     foo g("6");
     foo h("7");
     foo i("8");
+    foo j("9");
 
+    list1.push_back(j);
     list1.push_back(d);
-    list1.push_back(c);
-    list1.push_back(b);
-    list1.push_back(a);
-    list1.push_back(i);
-    list1.push_back(h);
-    list1.push_back(g);
-    list1.push_back(f);
-    list1.push_back(e);
+    //list1.push_back(c);
+    //list1.push_back(b);
+    //list1.push_back(a);
+    //list1.push_back(i);
+    //list1.push_back(h);
+    //list1.push_back(g);
+    //list1.push_back(f);
+    //list1.push_back(e);
 
     print_list("1", list1);
     print_list("2", list2);
@@ -83,14 +85,17 @@ int main(int, char **)
 	list1.copy_into(list2);
 	list1.sort();
 
+	print_list("S1", list1);
+
 	list3 = list1.select([] (foo &f) -> bool {
 		return _stricmp(f.p, "4") < 0;
 	});
 
 	foo *p = chs::find_last_of(list3, "2");
-	if(p != nullptr)
+	if(p != list3.done())
 	{
 		printf("Found: %s\n", p->p);
+		list3.remove(p);
 	}
 
 	list3.for_each([] (foo &f) {
@@ -101,7 +106,11 @@ int main(int, char **)
 		printf("%s\n", f.p);
 	});
 
-	list3.delete_if()
+	p = chs::find_first_of(list3, "1");
+	if(p != list3.done())
+	{
+		list3.remove(p);
+	}
 
     print_list("1", list1);
     print_list("2", list2);

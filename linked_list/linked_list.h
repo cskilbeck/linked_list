@@ -477,24 +477,22 @@ namespace chs
 
         //////////////////////////////////////////////////////////////////////
 
-        static list_t sort(list_t list)
+        static list_t sort(list_t list, size_t size)
         {
-            ptr h = list.head();
-            ptr m = h;
-            int s = 0;
-            while(h != list.root() && list.next(h) != list.root())
-            {
-                m = list.next(m);
-                h = list.next(m);
-                ++s;
-            }
-            if(s == 0)
+            if(size < 2)
             {
                 return list;
             }
-            list_t right = list.split(*m);
-            list = sort(list);
-            right = sort(right);
+            ptr h = list.head();
+            size_t left_size = size / 2;
+            size_t right_size = (size + 1) / 2;
+            for(size_t i=0; i<left_size; ++i)
+            {
+                h = list.next(h);
+            }
+            list_t right = list.split(*h);
+            list = sort(list, left_size);
+            right = sort(right, right_size);
             return merge(list, right);
         }
 
@@ -502,7 +500,7 @@ namespace chs
 
         void sort()
         {
-            *this = sort(*this);
+            *this = sort(*this, size());
         }
 
         //////////////////////////////////////////////////////////////////////
