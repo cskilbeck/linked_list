@@ -41,41 +41,14 @@ linked_list<foo> list0;
 linked_list<foo, &foo::node1> list1;
 linked_list<foo, &foo::node1> list2;
 
-using std::string;
-
-template <typename T> string get(T const &list)
-{
-	string empty;
-	string comma(",");
-	string *sep = &empty;
-	string result("[");
-	for(auto const &i: list)
-	{
-		result += *sep + i.to_string();
-		sep = &comma;
-	}
-	return result + "]";
-}
-
 //////////////////////////////////////////////////////////////////////
 
 template <typename T> void print_list(char const *h, T const &list)
 {
-    printf("%s %s\n", h, get(list).c_str());
+    printf("%s [%s]\n", h, chs::to_string(list).c_str());
 }
 
 //////////////////////////////////////////////////////////////////////
-// NODE, MEMBER
-// ref              ptr
-//
-// push_back
-// push_front
-// insert_before
-// insert_after
-// remove
-// pop_front
-// pop_back
-// 
 
 int main(int, char **)
 {
@@ -89,33 +62,18 @@ int main(int, char **)
     foo h("7");
     foo i("8");
 
-    list1.push_back(d);
-    list1.push_back(c);
-    list1.push_back(b);
-    list1.push_back(a);
-    list1.push_back(i);
-    list1.push_back(h);
-    list1.push_back(g);
-    list1.push_back(f);
-    list1.push_back(e);
-
-	list2 = list1.split(i);
+    //list1.push_back(d);
+    //list1.push_back(c);
+    //list1.push_back(b);
+    //list1.push_back(a);
+    //list1.push_back(i);
+    //list1.push_back(h);
+    //list1.push_back(g);
+    //list1.push_back(f);
+    //list1.push_back(e);
 
     print_list("1", list1);
     print_list("2", list2);
-
-	list1.clear();
-	list2.clear();
-
-    list1.push_back(d);
-    list1.push_back(c);
-    list1.push_back(b);
-    list1.push_back(a);
-    list1.push_back(i);
-    list1.push_back(h);
-    list1.push_back(g);
-    list1.push_back(f);
-    list1.push_back(e);
 
 	list1.sort();
 

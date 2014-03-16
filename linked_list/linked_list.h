@@ -256,14 +256,21 @@ namespace chs
 
 		static list_t &transfer(list_t &a, list_t &b)
 		{
-			T *ot = a.tail();
-			T *oh = a.head();
-			T *rt = b.root();
-			get_node(ot).next = rt;
-			get_node(oh).prev = rt;
-			get_node(rt).prev = ot;
-			get_node(rt).next = oh;
-			a.clear();
+			if(!a.empty())
+			{
+				T *ot = a.tail();
+				T *oh = a.head();
+				T *rt = b.root();
+				get_node(ot).next = rt;
+				get_node(oh).prev = rt;
+				get_node(rt).prev = ot;
+				get_node(rt).next = oh;
+				a.clear();
+			}
+			else
+			{
+				b.clear();
+			}
 			return b;
 		}
 
@@ -377,17 +384,6 @@ namespace chs
 			return new_list;
 		}
 
-		static std::string to_string(list_t const &l, char const *separator = ",")
-		{
-			string s;
-			for(auto const &p: l)
-			{
-				s += separator;
-				s += p.to_string();
-			}
-			return s;
-		}
-
 		static list_t merge(list_t &left, list_t &right)
 		{
 			list_t new_list;
@@ -446,6 +442,19 @@ namespace chs
 
 	//////////////////////////////////////////////////////////////////////
 	// reverse_iterator helper
+
+	template <typename T> std::string to_string(T const &l, char const *separator = ",")
+	{
+		std::string s;
+		char const *sep = "";
+		for(auto const &p: l)
+		{
+			s += sep;
+			s += p.to_string();
+			sep = separator;
+		}
+		return s;
+	}
 
 	template<class T> struct in_reverse
 	{
