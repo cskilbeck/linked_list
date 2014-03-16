@@ -59,33 +59,17 @@ template <typename T> void print_list(char const *h, T const &list)
 
 int main(int, char **)
 {
-    foo a(rand());
-    foo b(rand());
-    foo c(rand());
-    foo d(rand());
-    foo e(rand());
-    foo f(rand());
-    foo g(rand());
-    foo h(rand());
-    foo i(rand());
-    foo j(rand());
+	for(int i=0; i<101; ++i)
+	{
+		foo *f = new foo(rand());
+		list1.push_back(f);
+	}
 
-    list1.push_back(a);
-    list1.push_back(b);
-    list1.push_back(c);
-    list1.push_back(d);
-    list1.push_back(e);
-    list1.push_back(f);
-    list1.push_back(g);
-    list1.push_back(h);
-    list1.push_back(i);
-    list1.push_back(j);
-
-    print_list("1", list1);
+	print_list("1", list1);
 
 	list1.sort();
 
-	print_list("S1", list1);
+	print_list("\nS1", list1);
 
 	list1.copy_into(list2);
 
@@ -95,14 +79,14 @@ int main(int, char **)
 		list2.remove(ff);
 	}
 
-	print_list("2", list2);
+	print_list("\n2", list2);
 
 	list2.remove_if([] (foo &f)
 	{
 		return f.p < 20000;
 	});
 
-	print_list("2", list2);
+	print_list("\n2<", list2);
 
     getchar();
     return 0;
