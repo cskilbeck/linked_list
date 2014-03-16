@@ -528,6 +528,84 @@ namespace chs
             return t;
         }
 
+        //////////////////////////////////////////////////////////////////////
+
+        template<class O> ptr find_first_of(O const &t)
+        {
+            for(auto p = head(); p != done(); p = next(p))
+            {
+                if(*p == t)
+                {
+                    return p;
+                }
+            }
+            return nullptr;
+        }
+
+        //////////////////////////////////////////////////////////////////////
+
+        template<typename O> ptr find_last_of(O const &t)
+        {
+            for(auto p = tail(); p != done(); p = prev(p))
+            {
+                if(*p == t)
+                {
+                    return p;
+                }
+            }
+            return nullptr;
+        }
+
+        //////////////////////////////////////////////////////////////////////
+
+        unsigned remove_if(std::function<bool(ref)> func)
+        {
+            unsigned total = 0;
+            for(auto i = begin(), _end = end(), n = i; ++n, i != _end; i = n)
+            {
+                if(func(*i))
+                {
+                    remove(i);
+                    ++total;
+                }
+            }
+            return total;
+        }
+
+        //////////////////////////////////////////////////////////////////////
+
+        unsigned delete_if(std::function<bool(ref)> func)
+        {
+            unsigned total = 0;
+            for(auto i = begin(), _end = end(), n = i; ++n, i != _end; i = n)
+            {
+                if(func(*i))
+                {
+                    remove(i);
+                    delete i;
+                    ++total;
+                }
+            }
+            return total;
+        }
+
+        //////////////////////////////////////////////////////////////////////
+
+        void remove_all()
+        {
+            clear();
+        }
+
+        //////////////////////////////////////////////////////////////////////
+
+        void delete_all()
+        {
+            while(!empty())
+            {
+                ptr i = pop_front();
+                delete i;
+            }
+        }
     };
 
     //////////////////////////////////////////////////////////////////////
@@ -561,59 +639,6 @@ namespace chs
     template<class T> in_reverse<T> reverse(T &l)
     {
         return in_reverse<T>(l);
-    }
-
-    //////////////////////////////////////////////////////////////////////
-
-    template<class L, class T> auto find_first_of(L &l, T &t) -> decltype(l.head())
-    {
-        for(auto p = l.head(); p != l.done(); p = l.next(p))
-        {
-            if(*p == t)
-            {
-                return p;
-            }
-        }
-        return nullptr;
-    }
-
-    //////////////////////////////////////////////////////////////////////
-
-    template<class L, class T> auto find_last_of(L &l, T &t) -> decltype(l.head())
-    {
-        for(auto p = l.tail(); p != l.done(); p = l.prev(p))
-        {
-            if(*p == t)
-            {
-                return p;
-            }
-        }
-        return nullptr;
-    }
-
-    //////////////////////////////////////////////////////////////////////
-
-    template<class L> void remove_and_delete_all(L &l)
-    {
-        while(!l.empty())
-        {
-            auto i = l.pop_back();
-            delete &(*i);
-        }
-    }
-
-    //////////////////////////////////////////////////////////////////////
-
-    template<class L> void delete_if(L &l, std::function<bool(decltype(*(l.begin())))> func)
-    {
-        for(auto i = l.begin(), end = l.end(), n = i; ++n, i != end; i = n)
-        {
-            if(func(*i))
-            {
-                l.remove(i);
-                delete &(*i);
-            }
-        }
     }
 
     //////////////////////////////////////////////////////////////////////

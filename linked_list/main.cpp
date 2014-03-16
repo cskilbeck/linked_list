@@ -87,6 +87,23 @@ int main(int, char **)
 
 	print_list("S1", list1);
 
+	list1.copy_into(list2);
+
+	foo *ff = list2.find_first_of(18467);
+	if(ff != nullptr)
+	{
+		list2.remove(ff);
+	}
+
+	print_list("2", list2);
+
+	list2.remove_if([] (foo &f)
+	{
+		return f.p < 20000;
+	});
+
+	print_list("2", list2);
+
     getchar();
     return 0;
 }
