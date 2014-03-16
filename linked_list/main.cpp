@@ -14,7 +14,7 @@ using chs::list_node;
 
 struct foo : list_node<foo>
 {
-    foo(char const *n) : p(n)
+    foo(int n) : p(n)
     {
     }
     ~foo()
@@ -22,17 +22,19 @@ struct foo : list_node<foo>
     }
 	std::string to_string() const
 	{
-		return std::string(p);
+		char f[46];
+		sprintf_s(f, "%d", p);
+		return f;
 	}
     bool operator < (foo const &a)
     {
-		return strcmp(p, a.p) < 0;
+		return p < a.p;
     }
-	bool operator == (char const *c)
+	bool operator == (int c)
 	{
-		return _stricmp(p, c) == 0;
+		return c == p;
 	}
-    char const *p;
+    int p;
 
     list_node<foo> node1;
     list_node<foo> node2;
@@ -57,64 +59,33 @@ template <typename T> void print_list(char const *h, T const &list)
 
 int main(int, char **)
 {
-    foo a("0");
-    foo b("1");
-    foo c("2");
-    foo d("3");
-    foo e("4");
-    foo f("5");
-    foo g("6");
-    foo h("7");
-    foo i("8");
-    foo j("9");
+    foo a(rand());
+    foo b(rand());
+    foo c(rand());
+    foo d(rand());
+    foo e(rand());
+    foo f(rand());
+    foo g(rand());
+    foo h(rand());
+    foo i(rand());
+    foo j(rand());
 
-    list1.push_back(j);
+    list1.push_back(a);
+    list1.push_back(b);
+    list1.push_back(c);
     list1.push_back(d);
-    //list1.push_back(c);
-    //list1.push_back(b);
-    //list1.push_back(a);
-    //list1.push_back(i);
-    //list1.push_back(h);
-    //list1.push_back(g);
-    //list1.push_back(f);
-    //list1.push_back(e);
+    list1.push_back(e);
+    list1.push_back(f);
+    list1.push_back(g);
+    list1.push_back(h);
+    list1.push_back(i);
+    list1.push_back(j);
 
     print_list("1", list1);
-    print_list("2", list2);
 
-	list1.copy_into(list2);
 	list1.sort();
 
 	print_list("S1", list1);
-
-	list3 = list1.select([] (foo &f) -> bool {
-		return _stricmp(f.p, "4") < 0;
-	});
-
-	foo *p = chs::find_last_of(list3, "2");
-	if(p != list3.done())
-	{
-		printf("Found: %s\n", p->p);
-		list3.remove(p);
-	}
-
-	list3.for_each([] (foo &f) {
-		if(f.p[0] == '2')
-		{
-			list3.remove(f);
-		}
-		printf("%s\n", f.p);
-	});
-
-	p = chs::find_first_of(list3, "1");
-	if(p != list3.done())
-	{
-		list3.remove(p);
-	}
-
-    print_list("1", list1);
-    print_list("2", list2);
-    print_list("3", list3);
 
     getchar();
     return 0;

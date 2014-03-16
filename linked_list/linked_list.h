@@ -485,7 +485,7 @@ namespace chs
             }
             ptr h = list.head();
             size_t left_size = size / 2;
-            size_t right_size = (size + 1) / 2;
+            size_t right_size = size - left_size;
             for(size_t i=0; i<left_size; ++i)
             {
                 h = list.next(h);
@@ -565,16 +565,30 @@ namespace chs
 
     //////////////////////////////////////////////////////////////////////
 
-    template<class L, class T> auto find_first_of(L &l, T &t) -> decltype(l.begin())
+    template<class L, class T> auto find_first_of(L &l, T &t) -> decltype(l.head())
     {
-        return std::find(l.begin(), l.end(), t);
+        for(auto p = l.head(); p != l.done(); p = l.next(p))
+        {
+            if(*p == t)
+            {
+                return p;
+            }
+        }
+        return nullptr;
     }
 
     //////////////////////////////////////////////////////////////////////
 
-    template<class L, class T> auto find_last_of(L &l, T &t) -> decltype(l.rbegin())
+    template<class L, class T> auto find_last_of(L &l, T &t) -> decltype(l.head())
     {
-        return std::find(l.rbegin(), l.rend(), t);
+        for(auto p = l.tail(); p != l.done(); p = l.prev(p))
+        {
+            if(*p == t)
+            {
+                return p;
+            }
+        }
+        return nullptr;
     }
 
     //////////////////////////////////////////////////////////////////////
