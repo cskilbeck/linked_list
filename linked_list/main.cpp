@@ -2,7 +2,9 @@
 
 #include <stdio.h>
 #include <Windows.h>
+#include <list>
 #include <string>
+#include <algorithm>
 
 using std::string;
 
@@ -68,7 +70,7 @@ struct foo : list_node<foo>
 		sprintf_s(f, "%d", p);
 		return f;
 	}
-    bool operator < (foo const &a)
+    bool operator < (foo const &a) const
     {
 		return p < a.p;
     }
@@ -138,7 +140,7 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 
-foo foos[50];
+foo foos[5000000];
 
 int main(int, char **)
 {
@@ -174,14 +176,13 @@ int main(int, char **)
 	}
 
 	{
-		Timer t1("Build list");
 		for(int i=0; i<ARRAYSIZE(foos); ++i)
 		{
 			list1.push_back(foos[i]);
 		}
 	}
 
-	print_list("1", list1);
+//	print_list("1", list1);
 
 	{
 		Timer t2("Sort list");
@@ -199,7 +200,10 @@ int main(int, char **)
 		f = list1.next(f);
 	}
 
-	print_list("1", list1);
+
+
+
+//	print_list("1", list1);
 
 	getchar();
     return 0;
