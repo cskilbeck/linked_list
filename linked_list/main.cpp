@@ -160,11 +160,17 @@ int main(int, char **)
 		list1.push_back(d);
 
 		list2.push_back(e);
+		list2.push_back(f);
+		list2.push_back(g);
+		list2.push_back(h);
 
 		list_1t::merge(list1, list2);
 
 		print_list("1", list1);
 		print_list("2", list2);
+
+		list1.clear();
+		list2.clear();
 	}
 
 	{

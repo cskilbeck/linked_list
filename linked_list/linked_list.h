@@ -462,19 +462,16 @@ namespace chs
 
         void split(ref obj, list_t &new_list)
         {
-            T *new_root = new_list.root();
-
-			T *old_tail = tail();
-
 			T *prev_obj = prev(&obj);
-            T *next_obj = next(&obj);
-			
 			if(prev_obj == root())
 			{
 				transfer(*this, new_list);
 			}
 			else
 			{
+				T *new_root = new_list.root();
+				T *old_tail = tail();
+				T *next_obj = next(&obj);
 				if(next_obj == root())
 				{
 					get_node(old_tail).prev = new_root;
@@ -488,25 +485,23 @@ namespace chs
         }
 
 		//////////////////////////////////////////////////////////////////////
+		// can destroy left
+		// result in right
 
 		static void merge(list_t &left, list_t &right)
         {
-			list_t new_list;
-			while(!left.empty() && !right.empty())
+			ptr p = right.head();
+			while(!left.empty() && p != right.done())
 			{
-				if(*right.head() < *left.head())
+				ptr n = right.next(p);
+				while(*left.head() < *p && !left.empty())
 				{
-					new_list.push_back(right.pop_front());
+					right.insert_before(p, left.pop_front());
 				}
-				else
-				{
-					new_list.push_back(left.pop_front());
-				}
+				p = n;
 			}
-			new_list.append(left);
-			new_list.append(right);
-			transfer(new_list, right);
-        }
+			right.append(left);
+		}
 
         //////////////////////////////////////////////////////////////////////
 
@@ -523,8 +518,7 @@ namespace chs
                 m = left.next(m);
             }
 
-			list_t right;
-			left.split(*m, right);
+			left.split(*m, new_list);
 			if(left_size > 1)
 			{
 				list_t n1;
@@ -534,12 +528,10 @@ namespace chs
 			if(right_size > 1)
 			{
 				list_t n2;
-	            merge_sort(right, right_size, n2);
-				transfer(n2, right);
+	            merge_sort(new_list, right_size, n2);
+				transfer(n2, new_list);
 			}
-			list_t temp;
-			merge(left, right);
-			transfer(right, new_list);
+			merge(left, new_list);
         }
 
         //////////////////////////////////////////////////////////////////////
