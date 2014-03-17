@@ -451,27 +451,10 @@ namespace chs
             list_t new_list;
             while(!left.empty() && !right.empty())
             {
-                ptr l = left.head();
-                ptr r = right.head();
-                ptr w;
-                if(*r < *l)
-                {
-                    w = right.pop_front();
-                }
-                else
-                {
-                    w = left.pop_front();
-                }
-                new_list.push_back(w);
+                new_list.push_back((*right.head() < *left.head()) ? right.pop_front() : left.pop_front());
             }
-            if(!left.empty())
-            {
-                new_list.append(left);
-            }
-            else if(!right.empty())
-            {
-                new_list.append(right);
-            }
+            new_list.append(left);
+            new_list.append(right);
             return new_list;
         }
 
