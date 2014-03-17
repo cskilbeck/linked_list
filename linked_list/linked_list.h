@@ -321,7 +321,7 @@ namespace chs
 
         //////////////////////////////////////////////////////////////////////
 
-        linked_list(list_t &other)
+        explicit linked_list(list_t &other)
         {
 			static_assert(false, "no copy constructor, sorry...");
             transfer(other, *this);
@@ -329,11 +329,10 @@ namespace chs
 
         //////////////////////////////////////////////////////////////////////
 
-        list_t const &operator = (list_t &o)
-        {
-			static_assert(false, "no assignments please...");
-            return transfer(o, *this);
-        }
+		list_t &operator = (list_t &o)
+		{
+			return transfer(o, *this);
+		}
 
         //////////////////////////////////////////////////////////////////////
 
@@ -491,7 +490,7 @@ namespace chs
 		static void merge(list_t &left, list_t &_right)
         {
 			list_t right;
-			transfer(_right, right);
+			right = _right;
 			ptr p = right.head();
 			while(!left.empty() && p != right.done())
 			{
@@ -503,7 +502,7 @@ namespace chs
 				p = n;
 			}
 			right.append(left);
-			transfer(right, _right);
+			_right = right;
 		}
 
         //////////////////////////////////////////////////////////////////////
@@ -511,8 +510,7 @@ namespace chs
         static void merge_sort(list_t &list, size_t size, list_t &new_list)
         {
 			list_t left;
-			transfer(list, left);
-
+			left = list;
 			size_t left_size = size / 2;
 			size_t right_size = size - left_size;
             ptr m = left.head();
