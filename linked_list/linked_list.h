@@ -488,8 +488,10 @@ namespace chs
 		// can destroy left
 		// result in right
 
-		static void merge(list_t &left, list_t &right)
+		static void merge(list_t &left, list_t &_right)
         {
+			list_t right;
+			transfer(_right, right);
 			ptr p = right.head();
 			while(!left.empty() && p != right.done())
 			{
@@ -501,6 +503,7 @@ namespace chs
 				p = n;
 			}
 			right.append(left);
+			transfer(right, _right);
 		}
 
         //////////////////////////////////////////////////////////////////////
@@ -517,19 +520,14 @@ namespace chs
 			{
                 m = left.next(m);
             }
-
 			left.split(*m, new_list);
 			if(left_size > 1)
 			{
-				list_t n1;
-				merge_sort(left, left_size, n1);
-				transfer(n1, left);
+				merge_sort(left, left_size, left);
 			}
 			if(right_size > 1)
 			{
-				list_t n2;
-	            merge_sort(new_list, right_size, n2);
-				transfer(n2, new_list);
+	            merge_sort(new_list, right_size, new_list);
 			}
 			merge(left, new_list);
         }
