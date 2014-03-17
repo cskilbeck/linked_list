@@ -539,9 +539,7 @@ namespace chs
 			size_t s = size();
 			if(s > 1)
 			{
-				list_t n;
-				merge_sort(*this, size(), n);
-				transfer(n, *this);
+				merge_sort(*this, s, *this);
 			}
         }
 
