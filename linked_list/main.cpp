@@ -237,7 +237,7 @@ int __cdecl main(int, char **)
 	*/
 	//	printf("%d\n%s\n\n", word_list.size(), to_string(word_list, "\n").c_str());
 
-		linked_list<word>::merge(a, b);
+//		linked_list<word>::merge(a, b);
 
 	//	printf("%d\n%s\n\n", word_list.size(), to_string(word_list, "\n").c_str());
 	}
