@@ -157,7 +157,7 @@ foo foos[5000000];
 
 int main(int, char **)
 {
-	if(1)
+	if(0)
 	{
 		foo::index = 0;
 
@@ -171,10 +171,10 @@ int main(int, char **)
 		foo g(1);
 		foo h(1);
 
-		list1.push_back(a);
-		list1.push_back(b);
-		list1.push_back(c);
-		list1.push_back(d);
+		//list1.push_back(a);
+		//list1.push_back(b);
+		//list1.push_back(c);
+		//list1.push_back(d);
 
 		list2.push_back(e);
 		list2.push_back(f);
@@ -184,7 +184,7 @@ int main(int, char **)
 		show_list("1\\", list1);
 		show_list("2\\", list2);
 
-		list_1t::merge(list1, list2);
+		list1.append(list2);
 
 //		list1.move_range_before(d, list2, e, e);
 
@@ -209,6 +209,7 @@ int main(int, char **)
 		list1.sort();
 	}
 
+	printf(">\n");
 	foo *f = list1.head();
 	for(int i=0; i<25; ++i)
 	{
@@ -220,6 +221,7 @@ int main(int, char **)
 		f = list1.next(f);
 	}
 
+	printf("<\n");
 	f = list1.tail();
 	for(int i=0; i<25; ++i)
 	{
