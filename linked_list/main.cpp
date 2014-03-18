@@ -218,26 +218,29 @@ foo foos[5000000];
 
 int __cdecl main(int, char **)
 {
-	int s = ARRAYSIZE(words);
-	linked_list<word> a;
-	linked_list<word> b;
-
-	a.push_back(words[8]);
-	a.push_back(words[9]);
-
-	b.push_back(words[11]);
-	b.push_back(words[10]);
-
-/*	for(int i=0; i<s; ++i)
+	if(0)
 	{
-		word_list.push_back(words[i]);
+		int s = ARRAYSIZE(words);
+		linked_list<word> a;
+		linked_list<word> b;
+
+		a.push_back(words[8]);
+		a.push_back(words[9]);
+
+		b.push_back(words[11]);
+		b.push_back(words[10]);
+
+	/*	for(int i=0; i<s; ++i)
+		{
+			word_list.push_back(words[i]);
+		}
+	*/
+	//	printf("%d\n%s\n\n", word_list.size(), to_string(word_list, "\n").c_str());
+
+		linked_list<word>::merge(a, b);
+
+	//	printf("%d\n%s\n\n", word_list.size(), to_string(word_list, "\n").c_str());
 	}
-*/
-//	printf("%d\n%s\n\n", word_list.size(), to_string(word_list, "\n").c_str());
-
-	linked_list<word>::merge(a, b);
-
-//	printf("%d\n%s\n\n", word_list.size(), to_string(word_list, "\n").c_str());
 
 	if(0)
 	{
@@ -280,7 +283,7 @@ int __cdecl main(int, char **)
 	}
 
 
-	if(0)
+	if(1)
 	{
 	//	print_list("1", list1);
 

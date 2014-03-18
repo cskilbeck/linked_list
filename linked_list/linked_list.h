@@ -528,12 +528,28 @@ namespace chs
             ptr run_head = a.head();
             while(run_head != a.done() && insert_point != b.done())
             {
+                // find where to put a run in b
                 while(insert_point != b.done() && *insert_point < *run_head)
                 {
                     insert_point = b.next(insert_point);
                 }
-                if(insert_point == b.done())
+                // scanned off the end?
+                if(insert_point != b.done())
                 {
+                    // no, find how long the run should be from a
+                    ptr run_start = run_head;
+                    ptr run_end = run_head;
+                    while(run_head != a.done() && !(*insert_point < *run_head))
+                    {
+                        run_end = run_head;
+                        run_head = a.next(run_head);
+                    }
+                    // and insert it into b
+                    b.move_range_before(insert_point, a, run_start, run_end);
+                }
+                else
+                {
+                    // yes, just append remainder of a onto b
                     ptr ot = a.tail();
                     ptr rt = b.root();
                     ptr mt = b.tail();
@@ -544,15 +560,6 @@ namespace chs
                     a.clear();
                     break;
                 }
-                ptr run_last = run_head;
-                ptr run_tail = run_head;
-                while(run_last != a.done() && !(*insert_point < *run_last))
-                {
-                    run_tail = run_last;
-                    run_last = a.next(run_last);
-                }
-                b.move_range_before(insert_point, a, run_head, run_tail);
-                run_head = run_last;
             }
         }
 
