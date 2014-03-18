@@ -541,7 +541,7 @@ namespace chs
 			ptr run_head = left.head();
 			while(run_head != left.done() && insert_point != r.done())
 			{
-				while(insert_point != r.done() && !(*run_head < *insert_point))
+				while(insert_point != r.done() && *insert_point < *run_head)
 				{
 					insert_point = r.next(insert_point);
 				}
@@ -560,7 +560,7 @@ namespace chs
 				ptr n = r.next(insert_point);
 				ptr run_last = run_head;
 				ptr run_tail = run_head;
-				while(run_last != left.done() && *run_last < *insert_point)
+				while(run_last != left.done() && !(*insert_point < *run_last))
 				{
 					run_tail = run_last;
 					run_last = left.next(run_last);

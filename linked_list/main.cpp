@@ -48,28 +48,12 @@ using chs::list_node;
 
 //////////////////////////////////////////////////////////////////////
 
-template<class T> struct in_reverse
-{
-    T &l;
-    in_reverse(T &list) : l(list) {}
-
-    auto begin() ->         decltype(l.rbegin())   { return l.rbegin(); } 
-    auto begin() const ->   decltype(l.crbegin())  { return l.crbegin(); } 
-    auto end() ->           decltype(l.rend())     { return l.rend(); } 
-    auto end() const ->     decltype(l.crend())    { return l.crend(); } 
-};
-
-template<class T> in_reverse<T> reverse(T &l)
-{
-    return in_reverse<T>(l);
-}
-
-//////////////////////////////////////////////////////////////////////
-
 struct foo : list_node<foo>
 {
+	static int index;
     foo(int n) : p(n)
     {
+		i = index++;
     }
 	foo()
 	{
@@ -95,10 +79,13 @@ struct foo : list_node<foo>
 		return c == p;
 	}
     int p;
+	int i;
 
     list_node<foo> node1;
     list_node<foo> node2;
 };
+
+int foo::index = 0;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -119,6 +106,16 @@ list_1t list3;
 template <typename T> void print_list(char const *h, T const &list)
 {
     printf("%s (%s)\n", h, to_string(list).c_str());
+}
+
+template <typename T> void show_list(char const *t, T const &list)
+{
+	printf("%s\n", t);
+	for(auto const &i: list)
+	{
+		printf("%d: %d\n", i.i, i.p);
+	}
+	printf("\n");
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -162,15 +159,17 @@ int main(int, char **)
 {
 	if(1)
 	{
-		foo a(1);
-		foo b(2);
-		foo c(3);
-		foo d(100);
+		foo::index = 0;
 
-		foo e(5);
-		foo f(6);
-		foo g(7);
-		foo h(8);
+		foo a(1);
+		foo b(1);
+		foo c(1);
+		foo d(1);
+
+		foo e(1);
+		foo f(1);
+		foo g(1);
+		foo h(1);
 
 		list1.push_back(a);
 		list1.push_back(b);
@@ -182,15 +181,15 @@ int main(int, char **)
 		list2.push_back(g);
 		list2.push_back(h);
 
-		print_list("1", list1);
-		print_list("2", list2);
+		show_list("1\\", list1);
+		show_list("2\\", list2);
 
 		list_1t::merge(list1, list2);
 
 //		list1.move_range_before(d, list2, e, e);
 
-		print_list("1", list1);
-		print_list("2", list2);
+		show_list("1\\", list1);
+		show_list("2\\", list2);
 
 		list1.clear();
 		list2.clear();
