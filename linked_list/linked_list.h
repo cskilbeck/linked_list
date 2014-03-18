@@ -553,7 +553,6 @@ namespace chs
                 }
                 b.move_range_before(insert_point, a, run_head, run_tail);
                 run_head = run_last;
-                insert_point = b.next(insert_point);
             }
         }
 
@@ -562,23 +561,23 @@ namespace chs
 
         static void merge_sort(list_t &list, size_t size)
         {
-			if(size > 1)
-			{
-				list_t left(list);
-				list_t right;
-				size_t left_size = size / 2;
-				size_t right_size = size - left_size;
-				ptr m = left.head();
-				for(size_t s = 0; s < left_size; ++s)
-				{
-					m = left.next(m);
-				}
-				left.split(m, right);
-				merge_sort(left, left_size);
-				merge_sort(right, right_size);
-				merge(left, right);
-				list = right;
-			}
+            if(size > 1)
+            {
+                list_t left(list);
+                list_t right;
+                size_t left_size = size / 2;
+                size_t right_size = size - left_size;
+                ptr m = left.head();
+                for(size_t s = 0; s < left_size; ++s)
+                {
+                    m = left.next(m);
+                }
+                left.split(m, right);
+                merge_sort(left, left_size);
+                merge_sort(right, right_size);
+                merge(left, right);
+                list = right;
+            }
         }
 
         //////////////////////////////////////////////////////////////////////

@@ -18,13 +18,13 @@ template <typename T> string to_string(T const &l, char const *separator = ",")
 		s += p.to_string();
 		sep = separator;
 	}
-	sep = "\\";
-	for(auto const &p: reverse(l))
-	{
-		s += sep;
-		s += p.to_string();
-		sep = separator;
-	}
+	//sep = "\\";
+	//for(auto const &p: reverse(l))
+	//{
+	//	s += sep;
+	//	s += p.to_string();
+	//	sep = separator;
+	//}
 	return s;
 }
 
@@ -47,6 +47,71 @@ using chs::linked_list;
 using chs::list_node;
 
 //////////////////////////////////////////////////////////////////////
+
+struct word : list_node<word>
+{
+	int score;
+	char const *text;
+	size_t length;
+
+	word(int s, char const *t) : score(s), text(t)
+	{
+		length = strlen(text);
+	}
+
+	bool operator < (word const &other)
+	{
+		bool rc;
+		printf("((%d)%s < (%d)%s)", score, text, other.score, other.text);
+		if(score != other.score)
+		{
+			rc = score > other.score;
+		}
+		else if(length != other.length)
+		{
+			rc = length > other.length;
+		}
+		else
+		{
+			rc = strcmp(text, other.text) < 0;
+		}
+		printf(" = %s\n", rc ? "true" : "false");
+		return rc;
+	}
+
+	string to_string() const
+	{
+		char buf[16];
+		sprintf_s(buf, "%d", score);
+		string s;
+		s += buf;
+		s += ":";
+		s += text;
+		return s;
+	}
+};
+
+word words[] =
+{
+	{ 18, "hen" },
+	{ 18, "dip" },
+	{ 28, "dipt" },
+	{ 32, "take" },
+	{  9, "sou" },
+	{ 30, "sound" },
+	{ 15, "cee" },
+	{  9, "eel" },
+	{ 28, "eely" },	//8
+	{  9, "tea" },	//9
+	{  9, "tan" },	//10
+	{ 28, "dice" },	//11
+	{ 24, "poet" },
+	{ 16, "tule" },
+	{ 18, "any" },
+	{ 15, "ice" }
+};
+
+linked_list<word> word_list;
 
 struct foo : list_node<foo>
 {
@@ -88,10 +153,6 @@ struct foo : list_node<foo>
 int foo::index = 0;
 
 //////////////////////////////////////////////////////////////////////
-
-int gCopyConstructors = 0;
-int gAssignmentOperators = 0;
-int gMoveOperators = 0;
 
 linked_list<foo> list0;
 
@@ -157,6 +218,27 @@ foo foos[5000000];
 
 int __cdecl main(int, char **)
 {
+	int s = ARRAYSIZE(words);
+	linked_list<word> a;
+	linked_list<word> b;
+
+	a.push_back(words[8]);
+	a.push_back(words[9]);
+
+	b.push_back(words[11]);
+	b.push_back(words[10]);
+
+/*	for(int i=0; i<s; ++i)
+	{
+		word_list.push_back(words[i]);
+	}
+*/
+//	printf("%d\n%s\n\n", word_list.size(), to_string(word_list, "\n").c_str());
+
+	linked_list<word>::merge(a, b);
+
+//	printf("%d\n%s\n\n", word_list.size(), to_string(word_list, "\n").c_str());
+
 	if(0)
 	{
 		foo::index = 0;
@@ -197,35 +279,39 @@ int __cdecl main(int, char **)
 		}
 	}
 
-//	print_list("1", list1);
 
+	if(0)
 	{
-		Timer t2("Sort list");
-		list1.sort();
-	}
+	//	print_list("1", list1);
 
-	printf(">\n");
-	foo *f = list1.head();
-	for(int i=0; i<25; ++i)
-	{
-		if(f == list1.done())
 		{
-			break;
+			Timer t2("Sort list");
+			list1.sort();
 		}
-		printf("%d\n", f->p);
-		f = list1.next(f);
-	}
 
-	printf("<\n");
-	f = list1.tail();
-	for(int i=0; i<25; ++i)
-	{
-		if(f == list1.done())
+		printf(">\n");
+		foo *f = list1.head();
+		for(int i=0; i<25; ++i)
 		{
-			break;
+			if(f == list1.done())
+			{
+				break;
+			}
+			printf("%d\n", f->p);
+			f = list1.next(f);
 		}
-		printf("%d\n", f->p);
-		f = list1.prev(f);
+
+		printf("<\n");
+		f = list1.tail();
+		for(int i=0; i<25; ++i)
+		{
+			if(f == list1.done())
+			{
+				break;
+			}
+			printf("%d\n", f->p);
+			f = list1.prev(f);
+		}
 	}
 
 //	print_list("1", list1);
