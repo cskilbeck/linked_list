@@ -263,95 +263,7 @@ namespace chs
             return reinterpret_cast<const_ptr>(reinterpret_cast<char const *>(&node) - offset());
         }
 
-
-        //////////////////////////////////////////////////////////////////////
-        // empties a, result in b
-
-        static void merge(list_t &a, list_t &b)
-        {
-            ptr insert_point = b.head();
-            ptr run_head = a.head();
-            while(run_head != a.done() && insert_point != b.done())
-            {
-                // find where to put a run in b
-                while(insert_point != b.done() && *insert_point < *run_head)
-                {
-                    insert_point = b.next(insert_point);
-                }
-                // scanned off the end?
-                if(insert_point != b.done())
-                {
-                    // no, find how long the run should be from a
-                    ptr run_start = run_head;
-                    ptr run_end = run_head;
-                    while(run_head != a.done() && !(*insert_point < *run_head))
-                    {
-                        run_end = run_head;
-                        run_head = a.next(run_head);
-                    }
-                    // and insert it into b
-                    b.move_range_before(insert_point, a, run_start, run_end);
-                }
-                else
-                {
-                    // yes, just append remainder of a onto b
-                    ptr ot = a.tail();
-                    ptr rt = b.root();
-                    ptr mt = b.tail();
-                    get_node(mt).next = run_head;
-                    get_node(run_head).prev = mt;
-                    get_node(ot).next = rt;
-                    get_node(rt).prev = ot;
-                    break;
-                }
-            }
-        }
-
-        //////////////////////////////////////////////////////////////////////
-        // thanks to the putty guy
-
-        static void merge_sort(list_t &list, size_t size)
-        {
-            if(size > 1)
-            {
-				list_t left;
-				list_t right;
-                T *ot = list.tail();
-                T *oh = list.head();
-                T *rt = left.root();
-                get_node(ot).next = rt;
-                get_node(oh).prev = rt;
-                get_node(rt).prev = ot;
-                get_node(rt).next = oh;
-                size_t left_size = size / 2;
-                size_t right_size = size - left_size;
-                ptr m = left.head();
-                for(size_t s = 0; s < left_size; ++s)
-                {
-                    m = left.next(m);
-                }
-				T *new_root = right.root();
-                T *old_tail = left.tail();
-	            T *prev_obj = left.prev(m);
-                get_node(old_tail).next = new_root;
-                get_node(prev_obj).next = left.root();
-                get_node(left.root()).prev = prev_obj;
-				right.get_node(new_root).next = m;
-                right.get_node(new_root).prev = old_tail;
-				merge_sort(left, left_size);
-                merge_sort(right, right_size);
-                merge(left, right);
-                ot = right.tail();
-                oh = right.head();
-                rt = list.root();
-				get_node(ot).next = rt;
-                get_node(oh).prev = rt;
-                get_node(rt).prev = ot;
-                get_node(rt).next = oh;
-            }
-        }
-	
-	public:
+    public:
 
         //////////////////////////////////////////////////////////////////////
 
@@ -604,6 +516,74 @@ namespace chs
                 get_node(root()).prev = prev_obj;
                 new_list.get_node(new_root).next = obj;
                 new_list.get_node(new_root).prev = old_tail;
+            }
+        }
+
+        //////////////////////////////////////////////////////////////////////
+        // empties a, result in b
+
+        static void merge(list_t &a, list_t &b)
+        {
+            ptr insert_point = b.head();
+            ptr run_head = a.head();
+            while(run_head != a.done() && insert_point != b.done())
+            {
+                // find where to put a run in b
+                while(insert_point != b.done() && *insert_point < *run_head)
+                {
+                    insert_point = b.next(insert_point);
+                }
+                // scanned off the end?
+                if(insert_point != b.done())
+                {
+                    // no, find how long the run should be from a
+                    ptr run_start = run_head;
+                    ptr run_end = run_head;
+                    while(run_head != a.done() && !(*insert_point < *run_head))
+                    {
+                        run_end = run_head;
+                        run_head = a.next(run_head);
+                    }
+                    // and insert it into b
+                    b.move_range_before(insert_point, a, run_start, run_end);
+                }
+                else
+                {
+                    // yes, just append remainder of a onto b
+                    ptr ot = a.tail();
+                    ptr rt = b.root();
+                    ptr mt = b.tail();
+                    get_node(mt).next = run_head;
+                    get_node(run_head).prev = mt;
+                    get_node(ot).next = rt;
+                    get_node(rt).prev = ot;
+                    a.clear();
+                    break;
+                }
+            }
+        }
+
+        //////////////////////////////////////////////////////////////////////
+        // thanks to the putty guy
+
+        static void merge_sort(list_t &list, size_t size)
+        {
+            if(size > 1)
+            {
+                list_t left(list);
+                list_t right;
+                size_t left_size = size / 2;
+                size_t right_size = size - left_size;
+                ptr m = left.head();
+                for(size_t s = 0; s < left_size; ++s)
+                {
+                    m = left.next(m);
+                }
+                left.split(m, right);
+                merge_sort(left, left_size);
+                merge_sort(right, right_size);
+                merge(left, right);
+                list = right;
             }
         }
 
