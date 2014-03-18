@@ -524,20 +524,19 @@ namespace chs
 
         static void merge(list_t &a, list_t &b)
         {
-            list_t t(b);
-            ptr insert_point = t.head();
+            ptr insert_point = b.head();
             ptr run_head = a.head();
-            while(run_head != a.done() && insert_point != t.done())
+            while(run_head != a.done() && insert_point != b.done())
             {
-                while(insert_point != t.done() && *insert_point < *run_head)
+                while(insert_point != b.done() && *insert_point < *run_head)
                 {
-                    insert_point = t.next(insert_point);
+                    insert_point = b.next(insert_point);
                 }
-                if(insert_point == t.done())
+                if(insert_point == b.done())
                 {
                     ptr ot = a.tail();
-                    ptr rt = t.root();
-                    ptr mt = t.tail();
+                    ptr rt = b.root();
+                    ptr mt = b.tail();
                     get_node(mt).next = run_head;
                     get_node(run_head).prev = mt;
                     get_node(ot).next = rt;
@@ -552,11 +551,10 @@ namespace chs
                     run_tail = run_last;
                     run_last = a.next(run_last);
                 }
-                t.move_range_before(insert_point, a, run_head, run_tail);
+                b.move_range_before(insert_point, a, run_head, run_tail);
                 run_head = run_last;
-                insert_point = t.next(insert_point);
+                insert_point = b.next(insert_point);
             }
-            b = t;
         }
 
         //////////////////////////////////////////////////////////////////////
@@ -564,37 +562,30 @@ namespace chs
 
         static void merge_sort(list_t &list, size_t size)
         {
-            list_t left(list);
-            list_t right;
-            size_t left_size = size / 2;
-            size_t right_size = size - left_size;
-            ptr m = left.head();
-            for(size_t s = 0; s < left_size; ++s)
-            {
-                m = left.next(m);
-            }
-            left.split(m, right);
-            if(left_size > 1)
-            {
-                merge_sort(left, left_size);
-            }
-            if(right_size > 1)
-            {
-                merge_sort(right, right_size);
-            }
-            merge(left, right);
-            list = right;
+			if(size > 1)
+			{
+				list_t left(list);
+				list_t right;
+				size_t left_size = size / 2;
+				size_t right_size = size - left_size;
+				ptr m = left.head();
+				for(size_t s = 0; s < left_size; ++s)
+				{
+					m = left.next(m);
+				}
+				left.split(m, right);
+				merge_sort(left, left_size);
+				merge_sort(right, right_size);
+				merge(left, right);
+				list = right;
+			}
         }
 
         //////////////////////////////////////////////////////////////////////
 
         void sort()
         {
-            size_t s = size();
-            if(s > 1)
-            {
-                merge_sort(*this, s);
-            }
+            merge_sort(*this, size());
         }
 
         //////////////////////////////////////////////////////////////////////

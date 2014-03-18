@@ -155,7 +155,7 @@ private:
 
 foo foos[5000000];
 
-int main(int, char **)
+int __cdecl main(int, char **)
 {
 	if(0)
 	{
@@ -165,34 +165,29 @@ int main(int, char **)
 		foo b(1);
 		foo c(1);
 		foo d(1);
-
-		foo e(1);
-		foo f(1);
+		foo e(0);
+		foo f(0);
 		foo g(1);
 		foo h(1);
+		foo i(0);
 
-		//list1.push_back(a);
-		//list1.push_back(b);
-		//list1.push_back(c);
-		//list1.push_back(d);
-
-		list2.push_back(e);
-		list2.push_back(f);
-		list2.push_back(g);
-		list2.push_back(h);
-
-		show_list("1\\", list1);
-		show_list("2\\", list2);
-
-		list1.append(list2);
-
-//		list1.move_range_before(d, list2, e, e);
+		list1.push_back(a);
+		list1.push_back(b);
+		list1.push_back(c);
+		list1.push_back(d);
+		list1.push_back(e);
+		list1.push_back(f);
+		list1.push_back(g);
+		list1.push_back(h);
+		list1.push_back(i);
 
 		show_list("1\\", list1);
-		show_list("2\\", list2);
+
+		list1.sort();
+
+		show_list("1\\", list1);
 
 		list1.clear();
-		list2.clear();
 	}
 
 	{
@@ -233,11 +228,9 @@ int main(int, char **)
 		f = list1.prev(f);
 	}
 
-
-
-
 //	print_list("1", list1);
 
+	printf("Press enter...");
 	getchar();
     return 0;
 }
