@@ -314,6 +314,40 @@ namespace chs
 
         //////////////////////////////////////////////////////////////////////
 
+		void remove_range(ptr f, ptr l)
+		{
+			ptr op = prev(f);
+			ptr on = next(l);
+			get_node(op).next = on;
+			get_node(on).prev = op;
+		}
+
+        //////////////////////////////////////////////////////////////////////
+
+		void move_range_before(ptr where, list_t &other, ptr f, ptr l)
+		{
+			other.remove_range(f, l);
+			ptr p = get_node(where).prev;
+			get_node(p).next = f;
+			get_node(f).prev = p;
+			get_node(where).prev = l;
+			get_node(l).next = where;
+		}
+
+        //////////////////////////////////////////////////////////////////////
+
+		void move_range_after(ptr where, list_t &other, ptr f, ptr l)
+		{
+			other.remove_range(f, l);
+			ptr p = get_node(where).next;
+			get_node(p).prev = l;
+			get_node(l).next = p;
+			get_node(where).next = f;
+			get_node(f).prev = where;
+		}
+
+        //////////////////////////////////////////////////////////////////////
+
         linked_list()
         {
             clear();
@@ -323,7 +357,6 @@ namespace chs
 
         explicit linked_list(list_t &other)
         {
-			static_assert(false, "no copy constructor, sorry...");
             transfer(other, *this);
         }
 
@@ -339,15 +372,15 @@ namespace chs
         list_t const &operator = (list_t const &&o)
         {
 			static_assert(false, "no assignments please...");
-            return transfer(o, *this);
+            return &nullptr;
         }
 
         //////////////////////////////////////////////////////////////////////
 
         list_t &operator = (list_t &&o)
         {
-			static_assert(false, "no assignments please...");
-            return transfer(o, *this);
+			static_assert(false, "no rvalue moves please...");
+            return &nullptr;
         }
 
         //////////////////////////////////////////////////////////////////////
@@ -402,7 +435,22 @@ namespace chs
         void      insert_before(ref bef, ref obj) { insert_before(&bef, &obj); }
         void      insert_after(ref aft, ref obj)  { insert_after(&aft, &obj); }
 
-        //////////////////////////////////////////////////////////////////////
+		void remove_range(ref f, ref l)
+		{
+			remove_range(&f, &l);
+		}
+		
+		void move_range_before(ref where, list_t &other, ref f, ref l)
+		{
+			move_range_before(&where, other, &f, &l);
+		}
+		
+		void move_range_after(ref where, list_t &other, ref f, ref l)
+		{
+			move_range_after(&where, other, &f, &l);
+		}
+
+		//////////////////////////////////////////////////////////////////////
 
         void append(list_t &other_list)
         {
@@ -484,33 +532,52 @@ namespace chs
         }
 
 		//////////////////////////////////////////////////////////////////////
-		// can destroy left
-		// result in right
+		// empties left, result in right
 
-		static void merge(list_t &left, list_t &_right)
+		static void merge(list_t &left, list_t &right)
         {
-			list_t right;
-			right = _right;
-			ptr p = right.head();
-			while(!left.empty() && p != right.done())
+			list_t r(right);
+			ptr insert_point = r.head();
+			ptr run_head = left.head();
+			while(run_head != left.done() && insert_point != r.done())
 			{
-				ptr n = right.next(p);
-				while(*left.head() < *p && !left.empty())
+				while(insert_point != r.done() && !(*run_head < *insert_point))
 				{
-					right.insert_before(p, left.pop_front());
+					insert_point = r.next(insert_point);
 				}
-				p = n;
+				if(insert_point == r.done())
+				{
+					ptr ot = left.tail();
+					ptr rt = r.root();
+					ptr mt = r.tail();
+					get_node(mt).next = run_head;
+					get_node(run_head).prev = mt;
+					get_node(ot).next = rt;
+					get_node(rt).prev = ot;
+					left.clear();
+					break;
+				}
+				ptr n = r.next(insert_point);
+				ptr run_last = run_head;
+				ptr run_tail = run_head;
+				while(run_last != left.done() && *run_last < *insert_point)
+				{
+					run_tail = run_last;
+					run_last = left.next(run_last);
+				}
+				r.move_range_before(insert_point, left, run_head, run_tail);
+				run_head = run_last;
+				insert_point = n;
 			}
-			right.append(left);
-			_right = right;
+			right = r;
 		}
 
         //////////////////////////////////////////////////////////////////////
+		// thanks to the putty guy
 
         static void merge_sort(list_t &list, size_t size, list_t &new_list)
         {
-			list_t left;
-			left = list;
+			list_t left(list);
 			size_t left_size = size / 2;
 			size_t right_size = size - left_size;
             ptr m = left.head();

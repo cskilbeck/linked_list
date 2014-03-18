@@ -28,6 +28,19 @@ template <typename T> string to_string(T const &l, char const *separator = ",")
 	return s;
 }
 
+template <typename T> void show_string(T const &l)
+{
+	string s("[");
+	char const *sep = "";
+	for(auto const &p : l)
+	{
+		s += sep;
+		s += p.to_string();
+		sep = ",";
+	}
+	OutputDebugString((s + "]\n").c_str());
+}
+
 #include "linked_list.h"
 
 using chs::linked_list;
@@ -58,8 +71,11 @@ struct foo : list_node<foo>
     foo(int n) : p(n)
     {
     }
-	foo() : p(rand())
+	foo()
 	{
+		int n = rand();
+		int n2 = rand();
+		p = (n << 15) | n2;
 	}
     ~foo()
     {
@@ -147,13 +163,13 @@ int main(int, char **)
 	if(1)
 	{
 		foo a(1);
-		foo b(3);
-		foo c(5);
-		foo d(7);
+		foo b(2);
+		foo c(3);
+		foo d(100);
 
-		foo e(2);
-		foo f(4);
-		foo g(6);
+		foo e(5);
+		foo f(6);
+		foo g(7);
 		foo h(8);
 
 		list1.push_back(a);
@@ -166,7 +182,12 @@ int main(int, char **)
 		list2.push_back(g);
 		list2.push_back(h);
 
+		print_list("1", list1);
+		print_list("2", list2);
+
 		list_1t::merge(list1, list2);
+
+//		list1.move_range_before(d, list2, e, e);
 
 		print_list("1", list1);
 		print_list("2", list2);
@@ -190,7 +211,7 @@ int main(int, char **)
 	}
 
 	foo *f = list1.head();
-	for(int i=0; i<50; ++i)
+	for(int i=0; i<25; ++i)
 	{
 		if(f == list1.done())
 		{
@@ -198,6 +219,17 @@ int main(int, char **)
 		}
 		printf("%d\n", f->p);
 		f = list1.next(f);
+	}
+
+	f = list1.tail();
+	for(int i=0; i<25; ++i)
+	{
+		if(f == list1.done())
+		{
+			break;
+		}
+		printf("%d\n", f->p);
+		f = list1.prev(f);
 	}
 
 
