@@ -565,49 +565,79 @@ namespace chs
         //////////////////////////////////////////////////////////////////////
         // thanks to the putty guy
 
+#if 0
         static void merge_sort(list_t &list, size_t size)
         {
             if(size > 1)
             {
-                list_t left;
+                list_t left(list);
                 list_t right;
-				T *ot = list.tail();
-                T *oh = list.head();
-                T *rt = left.root();
-                get_node(ot).next = rt;
-                get_node(oh).prev = rt;
-                get_node(rt).next = oh;
-                get_node(rt).prev = ot;
                 size_t left_size = size / 2;
                 size_t right_size = size - left_size;
                 ptr m = left.head();
-				ptr prev_obj;
                 for(size_t s = 0; s < left_size; ++s)
                 {
-					prev_obj = m;
                     m = left.next(m);
                 }
-                T *new_root = right.root();
-                T *old_tail = left.tail();
-                T *next_obj = left.next(m);
-				get_node(old_tail).prev = new_root;
-                get_node(old_tail).next = new_root;
-				get_node(rt).prev = prev_obj;
-				get_node(prev_obj).next = rt;
-                right.get_node(new_root).next = m;
-                right.get_node(new_root).prev = old_tail;
+                left.split(m, right);
                 merge_sort(left, left_size);
                 merge_sort(right, right_size);
                 merge(left, right);
+				list = right;
+            }
+        }
+#else
+
+		// nuclear option: sort as singly linked then fix up the prev pointers afterwards
+
+		static void merge_sort(list_t &list, size_t size)
+        {
+            if(size > 1)
+            {
+				// scan for midpoint
+				size_t left_size = size / 2;
+                size_t right_size = size - left_size;
+				ptr pm = list.head();
+                for(size_t s = 0; s < left_size; ++s)
+                {
+                    pm = list.next(pm);
+                }
+
+				// split into left, right
+				list_t left;
+                list_t right;
+                ptr lr = left.root();
+                ptr rr = right.root();
+				ptr ot = list.tail();
+                ptr oh = list.head();
+				ptr pp = list.get_node(pm).prev;
+				left.get_node(lr).prev = pp;
+				left.get_node(lr).next = oh;
+				left.get_node(oh).prev = lr;
+				left.get_node(pp).next = lr;
+				right.get_node(rr).prev = ot;
+				right.get_node(rr).next = pm;
+				right.get_node(pm).prev = rr;
+				right.get_node(ot).next = rr;
+
+				// sort them
+				merge_sort(left, left_size);
+                merge_sort(right, right_size);
+
+				// stitch them back together
+				merge(left, right);
+				
+				// move right (result) back into list
 				ot = right.tail();
                 oh = right.head();
-                rt = list.root();
-                get_node(ot).next = rt;
-                get_node(oh).prev = rt;
-                get_node(rt).next = oh;
-                get_node(rt).prev = ot;
+                lr = list.root();
+                get_node(ot).next = lr;
+                get_node(oh).prev = lr;
+                get_node(lr).next = oh;
+                get_node(lr).prev = ot;
 			}
         }
+#endif
 		
 		//////////////////////////////////////////////////////////////////////
 
