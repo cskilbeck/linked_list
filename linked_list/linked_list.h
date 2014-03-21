@@ -237,6 +237,13 @@ namespace chs
 
         //////////////////////////////////////////////////////////////////////
 
+		static ptr get_object(node_ptr node)
+		{
+            return reinterpret_cast<ptr>(reinterpret_cast<char *>(node) - offset());
+		}
+
+        //////////////////////////////////////////////////////////////////////
+
         static node_ref get_node(ptr obj)
         {
             return *reinterpret_cast<node_ptr>(reinterpret_cast<char *>(obj) + offset());
@@ -262,6 +269,34 @@ namespace chs
         {
             return reinterpret_cast<const_ptr>(reinterpret_cast<char const *>(&node) - offset());
         }
+
+        //////////////////////////////////////////////////////////////////////
+
+		static ptr get_next(ptr const o)
+		{
+			return get_node(o).next;
+		}
+
+        //////////////////////////////////////////////////////////////////////
+
+		static ptr get_prev(ptr const o)
+		{
+			return get_node(o).prev;
+		}
+
+        //////////////////////////////////////////////////////////////////////
+
+		static void set_next(ptr o, ptr const p)
+		{
+			get_node(o).next = p;
+		}
+
+        //////////////////////////////////////////////////////////////////////
+
+		static void set_prev(ptr o, ptr const p)
+		{
+			get_node(o).prev = p;
+		}
 
     public:
 
@@ -520,6 +555,100 @@ namespace chs
         }
 
         //////////////////////////////////////////////////////////////////////
+
+		static ptr forward_merge(ptr l, size_t ls, ptr r, size_t rs)
+		{
+			node_t head_node;
+			ptr lp = get_object(&head_node);
+			head_node.next = l;
+
+			while(rs > 0 && ls > 0)
+			{
+				ptr run_begin = r;
+				ptr run_end = r;
+				size_t or = rs;
+				while(rs > 0 && *r < *l)
+				{
+					run_end = r;
+					r = get_next(r);
+					--rs;
+				}
+
+				// now skip ahead in l...
+				ptr ln = get_next(l);
+				if(or != rs)
+				{
+					set_next(lp, run_begin);	// add run in front of l
+					set_next(run_end, l);
+				}
+				lp = l;
+				l = ln;
+				--ls;
+			}
+			// append any remainder
+			if(rs > 0)
+			{
+				set_next(lp, r);
+			}
+			return head_node.next;
+		}
+
+		static ptr forward_merge2(ptr l, size_t ls, ptr r, size_t rs)
+		{
+		}
+
+        //////////////////////////////////////////////////////////////////////
+
+		static ptr forward_sort(ptr first, ptr last, size_t size)
+		{
+			if(size > 1)
+			{
+				size_t left_size = size / 2;
+				size_t right_size = size - left_size;
+				ptr left = first;
+				ptr right = first;
+				ptr left_last = nullptr;
+				for(size_t n = 0; n < left_size; ++n)
+				{
+					left_last = right;
+					right = get_next(right);
+				}
+				ptr right_last = last;
+				left = forward_sort(left, left_last, left_size);
+				right = forward_sort(right, right_last, right_size);
+				return forward_merge(left, left_size, right, right_size);
+			}
+			else
+			{
+				return first;
+			}
+		}
+
+		void fixup_prev_pointers(ptr h, size_t s)
+		{
+			ptr p = root();
+			set_next(root(), h);
+			for(; s > 0; --s)
+			{
+				set_prev(h, p);
+				p = h;
+				h = get_next(h);
+			}
+			set_next(p, root());
+			set_prev(root(), p);
+		}
+
+		void f_sort()
+		{
+			size_t s = size();
+			if(s > 1)
+			{
+				ptr h = forward_sort(head(), tail(), s);
+				fixup_prev_pointers(h, s);
+			}
+		}
+
+        //////////////////////////////////////////////////////////////////////
         // empties a, result in b
 
         static void merge(list_t &a, list_t &b)
@@ -592,24 +721,24 @@ namespace chs
 
 		static void merge_sort(list_t &list, size_t size)
         {
-            if(size > 1)
-            {
+			if(size > 2)
+			{
 				// scan for midpoint
 				size_t left_size = size / 2;
-                size_t right_size = size - left_size;
+				size_t right_size = size - left_size;
 				ptr pm = list.head();
-                for(size_t s = 0; s < left_size; ++s)
-                {
-                    pm = list.next(pm);
-                }
+				for(size_t s = 0; s < left_size; ++s)
+				{
+					pm = list.next(pm);
+				}
 
 				// split into left, right
 				list_t left;
-                list_t right;
-                ptr lr = left.root();
-                ptr rr = right.root();
+				list_t right;
+				ptr lr = left.root();
+				ptr rr = right.root();
 				ptr ot = list.tail();
-                ptr oh = list.head();
+				ptr oh = list.head();
 				ptr pp = list.get_node(pm).prev;
 				left.get_node(lr).prev = pp;
 				left.get_node(lr).next = oh;
@@ -622,19 +751,34 @@ namespace chs
 
 				// sort them
 				merge_sort(left, left_size);
-                merge_sort(right, right_size);
+				merge_sort(right, right_size);
 
 				// stitch them back together
 				merge(left, right);
 				
 				// move right (result) back into list
 				ot = right.tail();
-                oh = right.head();
-                lr = list.root();
-                get_node(ot).next = lr;
-                get_node(oh).prev = lr;
-                get_node(lr).next = oh;
-                get_node(lr).prev = ot;
+				oh = right.head();
+				lr = list.root();
+				get_node(ot).next = lr;
+				get_node(oh).prev = lr;
+				get_node(lr).next = oh;
+				get_node(lr).prev = ot;
+			}
+			else if(size > 1)
+            {
+				ptr h = list.head();
+				ptr t = list.tail();
+				if(*t < *h)
+				{
+					ptr r = list.root();
+					get_node(r).next = t;
+					get_node(r).prev = h;
+					get_node(h).next = r;
+					get_node(h).prev = t;
+					get_node(t).next = h;
+					get_node(t).prev = r;
+				}
 			}
         }
 #endif
