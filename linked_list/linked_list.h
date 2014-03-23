@@ -555,7 +555,6 @@ namespace chs
         }
 
         //////////////////////////////////////////////////////////////////////
-        // empties a, result in b
 private:
         static void merge(list_t &left, list_t &right)
         {
