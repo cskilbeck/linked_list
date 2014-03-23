@@ -593,61 +593,6 @@ namespace chs
 			return head_node.next;
 		}
 
-		static ptr forward_merge2(ptr l, size_t ls, ptr r, size_t rs)
-		{
-		}
-
-        //////////////////////////////////////////////////////////////////////
-
-		static ptr forward_sort(ptr first, ptr last, size_t size)
-		{
-			if(size > 1)
-			{
-				size_t left_size = size / 2;
-				size_t right_size = size - left_size;
-				ptr left = first;
-				ptr right = first;
-				ptr left_last = nullptr;
-				for(size_t n = 0; n < left_size; ++n)
-				{
-					left_last = right;
-					right = get_next(right);
-				}
-				ptr right_last = last;
-				left = forward_sort(left, left_last, left_size);
-				right = forward_sort(right, right_last, right_size);
-				return forward_merge(left, left_size, right, right_size);
-			}
-			else
-			{
-				return first;
-			}
-		}
-
-		void fixup_prev_pointers(ptr h, size_t s)
-		{
-			ptr p = root();
-			set_next(root(), h);
-			for(; s > 0; --s)
-			{
-				set_prev(h, p);
-				p = h;
-				h = get_next(h);
-			}
-			set_next(p, root());
-			set_prev(root(), p);
-		}
-
-		void f_sort()
-		{
-			size_t s = size();
-			if(s > 1)
-			{
-				ptr h = forward_sort(head(), tail(), s);
-				fixup_prev_pointers(h, s);
-			}
-		}
-
         //////////////////////////////////////////////////////////////////////
         // empties a, result in b
 
@@ -655,69 +600,61 @@ namespace chs
         {
             ptr insert_point = b.head();
             ptr run_head = a.head();
-            while(run_head != a.done() && insert_point != b.done())
+			ptr ad = a.done();
+			ptr bd = b.done();
+            while(run_head != ad && insert_point != bd)
             {
                 // find where to put a run in b
-                while(insert_point != b.done() && *insert_point < *run_head)
+                while(insert_point != bd && *insert_point < *run_head)
                 {
-                    insert_point = b.next(insert_point);
+                    insert_point = get_next(insert_point);
                 }
                 // scanned off the end?
-                if(insert_point != b.done())
+                if(insert_point == bd)
+				{
+					break;
+				}
+				// no, find how long the run should be from a
+                ptr run_start = run_head;
+                ptr run_end = run_head;
+				run_head = get_next(run_head);
+                while(run_head != ad && *run_head < *insert_point)
                 {
-                    // no, find how long the run should be from a
-                    ptr run_start = run_head;
-                    ptr run_end = run_head;
-                    while(run_head != a.done() && !(*insert_point < *run_head))
-                    {
-                        run_end = run_head;
-                        run_head = a.next(run_head);
-                    }
-                    // and insert it into b
-                    b.move_range_before(insert_point, a, run_start, run_end);
+                    run_end = run_head;
+                    run_head = get_next(run_head);
                 }
-                else
-                {
-                    // yes, just append remainder of a onto b
-                    ptr ot = a.tail();
-                    ptr rt = b.root();
-                    ptr mt = b.tail();
-                    get_node(mt).next = run_head;
-                    get_node(run_head).prev = mt;
-                    get_node(ot).next = rt;
-                    get_node(rt).prev = ot;
-                    break;
-                }
+                // and insert it into b
+				ptr op = get_prev(run_start);
+				ptr on = run_head;
+				ptr p = get_node(insert_point).prev;
+
+				// remove run from a
+				get_node(op).next = on;
+				get_node(on).prev = op;
+
+				// add it to b
+				get_node(p).next = run_start;
+				get_node(run_start).prev = p;
+				get_node(insert_point).prev = run_end;
+				get_node(run_end).next = insert_point;
+
+				insert_point = get_next(insert_point);
             }
+			if(run_head != ad)
+			{
+                // yes, append remainder of a onto b
+                ptr ot = a.tail();
+                ptr rt = b.root();
+                ptr mt = b.tail();
+                get_node(mt).next = run_head;
+                get_node(run_head).prev = mt;
+                get_node(ot).next = rt;
+                get_node(rt).prev = ot;
+			}
         }
 
         //////////////////////////////////////////////////////////////////////
         // thanks to the putty guy
-
-#if 0
-        static void merge_sort(list_t &list, size_t size)
-        {
-            if(size > 1)
-            {
-                list_t left(list);
-                list_t right;
-                size_t left_size = size / 2;
-                size_t right_size = size - left_size;
-                ptr m = left.head();
-                for(size_t s = 0; s < left_size; ++s)
-                {
-                    m = left.next(m);
-                }
-                left.split(m, right);
-                merge_sort(left, left_size);
-                merge_sort(right, right_size);
-                merge(left, right);
-				list = right;
-            }
-        }
-#else
-
-		// nuclear option: sort as singly linked then fix up the prev pointers afterwards
 
 		static void merge_sort(list_t &list, size_t size)
         {
@@ -767,6 +704,7 @@ namespace chs
 			}
 			else if(size > 1)
             {
+				// dinky list of 2 entries, just fix it
 				ptr h = list.head();
 				ptr t = list.tail();
 				if(*t < *h)
@@ -781,7 +719,6 @@ namespace chs
 				}
 			}
         }
-#endif
 		
 		//////////////////////////////////////////////////////////////////////
 
