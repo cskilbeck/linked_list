@@ -555,45 +555,6 @@ namespace chs
         }
 
         //////////////////////////////////////////////////////////////////////
-
-		static ptr forward_merge(ptr l, size_t ls, ptr r, size_t rs)
-		{
-			node_t head_node;
-			ptr lp = get_object(&head_node);
-			head_node.next = l;
-
-			while(rs > 0 && ls > 0)
-			{
-				ptr run_begin = r;
-				ptr run_end = r;
-				size_t or = rs;
-				while(rs > 0 && *r < *l)
-				{
-					run_end = r;
-					r = get_next(r);
-					--rs;
-				}
-
-				// now skip ahead in l...
-				ptr ln = get_next(l);
-				if(or != rs)
-				{
-					set_next(lp, run_begin);	// add run in front of l
-					set_next(run_end, l);
-				}
-				lp = l;
-				l = ln;
-				--ls;
-			}
-			// append any remainder
-			if(rs > 0)
-			{
-				set_next(lp, r);
-			}
-			return head_node.next;
-		}
-
-        //////////////////////////////////////////////////////////////////////
         // empties a, result in b
 
         static void merge(list_t &a, list_t &b)
