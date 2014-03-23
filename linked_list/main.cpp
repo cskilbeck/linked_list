@@ -133,7 +133,7 @@ void test_merge(int *a, size_t B, int *b, size_t C)
 	list_t r;
 	make_list(l, a, lf, B);
 	make_list(r, b, rf, C);
-	list_t::merge(l, r);
+	l.merge_into(r);
 	check_list(r, B + C);
 	delete[] lf;
 	delete[] rf;

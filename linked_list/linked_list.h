@@ -237,10 +237,10 @@ namespace chs
 
         //////////////////////////////////////////////////////////////////////
 
-		static ptr get_object(node_ptr node)
-		{
+        static ptr get_object(node_ptr node)
+        {
             return reinterpret_cast<ptr>(reinterpret_cast<char *>(node) - offset());
-		}
+        }
 
         //////////////////////////////////////////////////////////////////////
 
@@ -272,31 +272,31 @@ namespace chs
 
         //////////////////////////////////////////////////////////////////////
 
-		static ptr get_next(ptr const o)
-		{
-			return get_node(o).next;
-		}
+        static ptr get_next(ptr const o)
+        {
+            return get_node(o).next;
+        }
 
         //////////////////////////////////////////////////////////////////////
 
-		static ptr get_prev(ptr const o)
-		{
-			return get_node(o).prev;
-		}
+        static ptr get_prev(ptr const o)
+        {
+            return get_node(o).prev;
+        }
 
         //////////////////////////////////////////////////////////////////////
 
-		static void set_next(ptr o, ptr const p)
-		{
-			get_node(o).next = p;
-		}
+        static void set_next(ptr o, ptr const p)
+        {
+            get_node(o).next = p;
+        }
 
         //////////////////////////////////////////////////////////////////////
 
-		static void set_prev(ptr o, ptr const p)
-		{
-			get_node(o).prev = p;
-		}
+        static void set_prev(ptr o, ptr const p)
+        {
+            get_node(o).prev = p;
+        }
 
     public:
 
@@ -556,13 +556,13 @@ namespace chs
 
         //////////////////////////////////////////////////////////////////////
         // empties a, result in b
-
-        static void merge(list_t &a, list_t &b)
+private:
+        static void merge(list_t &left, list_t &right)
         {
-            ptr insert_point = b.head();
-            ptr run_head = a.head();
-			ptr ad = a.done();
-			ptr bd = b.done();
+            ptr insert_point = right.head();
+            ptr run_head = left.head();
+            ptr ad = left.done();
+            ptr bd = right.done();
             while(run_head != ad && insert_point != bd)
             {
                 // find where to put a run in b
@@ -572,122 +572,126 @@ namespace chs
                 }
                 // scanned off the end?
                 if(insert_point == bd)
-				{
-					break;
-				}
-				// no, find how long the run should be from a
+                {
+                    break;
+                }
+                // no, find how long the run should be from a
                 ptr run_start = run_head;
                 ptr run_end = run_head;
-				run_head = get_next(run_head);
+                run_head = get_next(run_head);
                 while(run_head != ad && *run_head < *insert_point)
                 {
                     run_end = run_head;
                     run_head = get_next(run_head);
                 }
                 // and insert it into b
-				ptr op = get_prev(run_start);
-				ptr on = run_head;
-				ptr p = get_node(insert_point).prev;
+                ptr op = get_prev(run_start);
+                ptr on = run_head;
+                ptr p = get_node(insert_point).prev;
 
-				// remove run from a
-				get_node(op).next = on;
-				get_node(on).prev = op;
+                // add it to b
+                get_node(p).next = run_start;
+                get_node(run_start).prev = p;
+                get_node(insert_point).prev = run_end;
+                get_node(run_end).next = insert_point;
 
-				// add it to b
-				get_node(p).next = run_start;
-				get_node(run_start).prev = p;
-				get_node(insert_point).prev = run_end;
-				get_node(run_end).next = insert_point;
-
-				insert_point = get_next(insert_point);
+                insert_point = get_next(insert_point);
             }
-			if(run_head != ad)
-			{
+            if(run_head != ad)
+            {
                 // yes, append remainder of a onto b
-                ptr ot = a.tail();
-                ptr rt = b.root();
-                ptr mt = b.tail();
+                ptr ot = left.tail();
+                ptr rt = right.root();
+                ptr mt = right.tail();
                 get_node(mt).next = run_head;
                 get_node(run_head).prev = mt;
                 get_node(ot).next = rt;
                 get_node(rt).prev = ot;
-			}
+            }
         }
 
         //////////////////////////////////////////////////////////////////////
         // thanks to the putty guy
 
-		static void merge_sort(list_t &list, size_t size)
+        static void merge_sort(list_t &list, size_t size)
         {
-			if(size > 2)
-			{
-				// scan for midpoint
-				size_t left_size = size / 2;
-				size_t right_size = size - left_size;
-				ptr pm = list.head();
-				for(size_t s = 0; s < left_size; ++s)
-				{
-					pm = list.next(pm);
-				}
-
-				// split into left, right
-				list_t left;
-				list_t right;
-				ptr lr = left.root();
-				ptr rr = right.root();
-				ptr ot = list.tail();
-				ptr oh = list.head();
-				ptr pp = list.get_node(pm).prev;
-				left.get_node(lr).prev = pp;
-				left.get_node(lr).next = oh;
-				left.get_node(oh).prev = lr;
-				left.get_node(pp).next = lr;
-				right.get_node(rr).prev = ot;
-				right.get_node(rr).next = pm;
-				right.get_node(pm).prev = rr;
-				right.get_node(ot).next = rr;
-
-				// sort them
-				merge_sort(left, left_size);
-				merge_sort(right, right_size);
-
-				// stitch them back together
-				merge(left, right);
-				
-				// move right (result) back into list
-				ot = right.tail();
-				oh = right.head();
-				lr = list.root();
-				get_node(ot).next = lr;
-				get_node(oh).prev = lr;
-				get_node(lr).next = oh;
-				get_node(lr).prev = ot;
-			}
-			else if(size > 1)
+            if(size > 2)
             {
-				// dinky list of 2 entries, just fix it
-				ptr h = list.head();
-				ptr t = list.tail();
-				if(*t < *h)
-				{
-					ptr r = list.root();
-					get_node(r).next = t;
-					get_node(r).prev = h;
-					get_node(h).next = r;
-					get_node(h).prev = t;
-					get_node(t).next = h;
-					get_node(t).prev = r;
-				}
-			}
-        }
-		
-		//////////////////////////////////////////////////////////////////////
+                // scan for midpoint
+                size_t left_size = size / 2;
+                size_t right_size = size - left_size;
+                ptr pm = list.head();
+                for(size_t s = 0; s < left_size; ++s)
+                {
+                    pm = list.next(pm);
+                }
 
+                // split into left, right
+                list_t left;
+                list_t right;
+                ptr lr = left.root();
+                ptr rr = right.root();
+                ptr ot = list.tail();
+                ptr oh = list.head();
+                ptr pp = list.get_node(pm).prev;
+                left.get_node(lr).prev = pp;
+                left.get_node(lr).next = oh;
+                left.get_node(oh).prev = lr;
+                left.get_node(pp).next = lr;
+                right.get_node(rr).prev = ot;
+                right.get_node(rr).next = pm;
+                right.get_node(pm).prev = rr;
+                right.get_node(ot).next = rr;
+
+                // sort them
+                merge_sort(left, left_size);
+                merge_sort(right, right_size);
+
+                // stitch them back together
+                merge(left, right);
+                
+                // move right (result) back into list
+                ot = right.tail();
+                oh = right.head();
+                lr = list.root();
+                get_node(ot).next = lr;
+                get_node(oh).prev = lr;
+                get_node(lr).next = oh;
+                get_node(lr).prev = ot;
+            }
+            else if(size > 1)
+            {
+                // dinky list of 2 entries, just fix it
+                ptr h = list.head();
+                ptr t = list.tail();
+                if(*t < *h)
+                {
+                    ptr r = list.root();
+                    get_node(r).next = t;
+                    get_node(r).prev = h;
+                    get_node(h).next = r;
+                    get_node(h).prev = t;
+                    get_node(t).next = h;
+                    get_node(t).prev = r;
+                }
+            }
+        }
+        
+        //////////////////////////////////////////////////////////////////////
+public:
         void sort()
         {
             merge_sort(*this, size());
         }
 
+        //////////////////////////////////////////////////////////////////////
+
+        void merge_into(list_t &other)
+        {
+            merge(*this, other);
+            clear();
+        }
+        
         //////////////////////////////////////////////////////////////////////
 
         void for_each(std::function<void(T &)> func)
