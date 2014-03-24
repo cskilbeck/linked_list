@@ -6,6 +6,7 @@
 #include <vector>
 #include <string>
 #include <algorithm>
+#include <iterator>
 #include "linked_list.h"
 
 using std::string;
@@ -25,24 +26,41 @@ public:
 
 	Timer(char const *name) : mName(name)
 	{
+		printf("%s begins\n", mName);
+		SetProcessPriorityBoost(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
 		QueryPerformanceCounter((LARGE_INTEGER *)&mStart);
+	}
+
+	void Stop()
+	{
+		QueryPerformanceCounter((LARGE_INTEGER *)&mEnd);
+	}
+
+	double ms()
+	{
+		LARGE_INTEGER resolution64;
+		QueryPerformanceFrequency(&resolution64);
+		volatile double total = (double)(mEnd.QuadPart - mStart.QuadPart);
+		total *= 1000.0;
+		total /= (double)resolution64.QuadPart;
+		return total;
+	}
+
+	void Snapshot()
+	{
+		Stop();
+		printf("%s took %fms\n", mName, ms());
 	}
 
 	~Timer()
 	{
-		LARGE_INTEGER now;
-		LARGE_INTEGER resolution64;
-		QueryPerformanceCounter(&now);
-		QueryPerformanceFrequency(&resolution64);
-		volatile double total = (double)(now.QuadPart - mStart.QuadPart);
-		total *= 1000.0;
-		total /= (double)resolution64.QuadPart;
-		printf("%s took %fms\n", mName, total);
+		SetProcessPriorityBoost(GetCurrentProcess(), NORMAL_PRIORITY_CLASS);
 	}
 
 private:
-
+	
 	volatile LARGE_INTEGER mStart;
+	volatile LARGE_INTEGER mEnd;
 	char const *mName;
 };
 
@@ -149,6 +167,49 @@ void test_sort(int *a, size_t B)
 	delete[] f1;
 }
 
+template <typename T, T a=0, T b=0> struct range
+{
+	struct iterator : std::iterator<std::forward_iterator_tag, int>
+	{
+		T value;
+
+		iterator(T n)
+		{
+			value = n;
+		}
+
+		T operator ++()
+		{
+			return ++value;
+		}
+
+		bool operator != (iterator const &other)
+		{
+			return value != other.value;
+		}
+
+		T operator *()
+		{
+			return value;
+		}
+	};
+
+	iterator begin()
+	{
+		return iterator(a);
+	}
+
+	iterator end()
+	{
+		return iterator(b+1);
+	}
+};
+
+template <typename T, T a, T b> range<T, a, b> grange(T a, T b)
+{
+	return range<T, a, b>();
+}
+
 #define merge_test(x, y) test_merge(x, ARRAYSIZE(x), y, ARRAYSIZE(y))
 #define sort_test(x) test_sort(x, ARRAYSIZE(x))
 
@@ -173,7 +234,7 @@ void test_sort(int *a, size_t B)
 	int knob4[] = { 1, 2, 3, 1 };
 	int knob5[] = { 123,345,234,534,76,576,345,2345,564,576,576,345,234,1234,345,456,576,345,2345,234,2345,76,786,768,356 };
 
-foo foos[5000000];
+foo foos[5000001];
 
 int __cdecl main(int, char **)
 {
@@ -207,16 +268,23 @@ int __cdecl main(int, char **)
 
 
 #else
+
+	std::vector<double> times;
+	for (int i = 0; i < 20; ++i)
 	{
 		list1.clear();
-		for(int i=0; i<5000000; ++i)
+		for(int i=0; i<5000001; ++i)
 		{
 			list1.push_back(foos[i]);
 		}
 		size_t l1 = list1.size();
 		{
-			Timer t("sort");
+			Timer t("sort ");
 			list1.sort();
+			t.Stop();
+			double ms = t.ms();
+			times.push_back(ms);
+			printf(" took %f\n", ms);
 		}
 
 		size_t l3 = list1.size();
@@ -232,9 +300,16 @@ int __cdecl main(int, char **)
 			{
 				printf("");
 				printf("Sort error!\n");
+				break;
 			}
 			m = f.p;
 		}
+	}
+	std::sort(times.begin(), times.end());
+	printf("Times:\n");
+	for (auto d : times)
+	{
+		printf("%f\n", d);
 	}
 #endif
 
