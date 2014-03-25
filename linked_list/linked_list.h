@@ -564,44 +564,45 @@ private:
             ptr bd = right.done();
             while(run_head != ad)
             {
-                // find where to put a run in b
-				do
-				{
-					insert_point = get_next(insert_point);
-				} while (insert_point != bd && *insert_point < *run_head);
+                // find where to put a run
+                do
+                {
+                    insert_point = get_next(insert_point);
+                }
+                while (insert_point != bd && *insert_point < *run_head);
 
-				// scanned off the end?
-				if (insert_point != bd)
-				{
-					// no, find how long the run should be from a
-					ptr run_start = run_head;
-					ptr run_end;
-					do
-					{
-						run_end = run_head;
-						run_head = get_next(run_head);
-					} while (run_head != ad && *run_head < *insert_point);
+                // scanned off the end?
+                if (insert_point != bd)
+                {
+                    // no, find how long the run should be
+                    ptr run_start = run_head;
+                    ptr run_end;
+                    do
+                    {
+                        run_end = run_head;
+                        run_head = get_next(run_head);
+                    }
+                    while (run_head != ad && *run_head < *insert_point);
 
-					// insert it into right
-					ptr op = get_prev(run_start);
-					ptr on = run_head;
-					ptr p = get_node(insert_point).prev;
-					get_node(p).next = run_start;
-					get_node(run_start).prev = p;
-					get_node(insert_point).prev = run_end;
-					get_node(run_end).next = insert_point;
-				}
-				else
-				{	// appnd remainder of left
-					ptr ot = left.tail();
-					ptr rt = right.root();
-					ptr mt = right.tail();
-					get_node(mt).next = run_head;
-					get_node(run_head).prev = mt;
-					get_node(ot).next = rt;
-					get_node(rt).prev = ot;
-					break;
-				}
+                    // insert it
+                    ptr op = get_prev(run_start);
+                    ptr p = get_node(insert_point).prev;
+                    set_prev(run_start, p);
+                    set_next(p, run_start);
+                    set_prev(insert_point, run_end);
+                    set_next(run_end, insert_point);
+                }
+                else
+                {   // yes, append remainder
+                    ptr ot = left.tail();
+                    ptr rt = right.root();
+                    ptr mt = right.tail();
+                    set_prev(run_head, mt);
+                    set_next(mt, run_head);
+                    set_prev(rt, ot);
+                    set_next(ot, rt);
+                    break;
+                }
             }
         }
 
@@ -629,14 +630,14 @@ private:
                 ptr ot = list.tail();
                 ptr oh = list.head();
                 ptr pp = list.get_node(pm).prev;
-				set_prev(lr, pp);
-				set_next(lr, oh);
-				set_prev(oh, lr);
-				set_next(pp, lr);
-				set_prev(rr, ot);
-				set_next(rr, pm);
-				set_prev(pm, rr);
-				set_next(ot, rr);
+                set_prev(lr, pp);
+                set_next(lr, oh);
+                set_prev(oh, lr);
+                set_next(pp, lr);
+                set_prev(rr, ot);
+                set_next(rr, pm);
+                set_prev(pm, rr);
+                set_next(ot, rr);
 
                 // sort them
                 merge_sort(left, left_size);
@@ -645,14 +646,14 @@ private:
                 // stitch them back together
                 merge(right, left);
                 
-                // move right (result) back into list
+                // move result back into list
                 ot = left.tail();
                 oh = left.head();
                 lr = list.root();
-				set_prev(oh, lr);
-				set_next(ot, lr);
-				set_prev(lr, ot);
-				set_next(lr, oh);
+                set_prev(oh, lr);
+                set_next(ot, lr);
+                set_prev(lr, ot);
+                set_next(lr, oh);
             }
             else if(size > 1)
             {
@@ -662,12 +663,12 @@ private:
                 if(*t < *h)
                 {
                     ptr r = list.root();
-                    get_node(r).next = t;
-                    get_node(r).prev = h;
-                    get_node(h).next = r;
-                    get_node(h).prev = t;
-                    get_node(t).next = h;
-                    get_node(t).prev = r;
+                    set_next(r, t);
+                    set_prev(r, h);
+                    set_next(h, r);
+                    set_prev(h, t);
+                    set_next(t, h);
+                    set_prev(t, r);
                 }
             }
         }
