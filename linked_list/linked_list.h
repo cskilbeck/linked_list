@@ -643,11 +643,11 @@ private:
                 merge_sort(right, right_size);
 
                 // stitch them back together
-                merge(left, right);
+                merge(right, left);
                 
                 // move right (result) back into list
-                ot = right.tail();
-                oh = right.head();
+                ot = left.tail();
+                oh = left.head();
                 lr = list.root();
 				set_prev(oh, lr);
 				set_next(ot, lr);
