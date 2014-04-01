@@ -585,8 +585,7 @@ private:
                     while (run_head != ad && *run_head < *insert_point);
 
                     // insert it
-                    ptr op = get_prev(run_start);
-                    ptr p = get_node(insert_point).prev;
+                    ptr p = get_prev(insert_point);
                     set_prev(run_start, p);
                     set_next(p, run_start);
                     set_prev(insert_point, run_end);
@@ -629,7 +628,7 @@ private:
                 ptr rr = right.root();
                 ptr ot = list.tail();
                 ptr oh = list.head();
-                ptr pp = list.get_node(pm).prev;
+                ptr pp = list.get_prev(pm);
                 set_prev(lr, pp);
                 set_next(lr, oh);
                 set_prev(oh, lr);
